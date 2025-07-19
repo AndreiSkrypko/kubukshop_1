@@ -1,0 +1,20 @@
+kubikshop/                # Корневая папка проекта
+├── backend/              # Django + DRF backend
+│   ├── backend/          # Django project (settings, urls и т.п.)
+│   ├── products/         # Django app example (catalog товаров)
+│   ├── users/            # Django app для пользователей (опционально)
+│   ├── manage.py
+│   ├── requirements.txt
+│   └── ...               # другие backend-файлы
+│
+├── frontend/             # React frontend
+│   ├── node_modules/
+│   ├── public/
+│   ├── src/
+│   ├── package.json
+│   └── ...               # другие frontend-файлы
+│
+├── .gitignore
+├── README.md
+├── venv/                 # Виртуальное окружение Python
+└── (другие корневые файлы, например docker-compose.yml, LICENSE и т.п.)
