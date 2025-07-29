@@ -1,5 +1,7 @@
 from pathlib import Path
-import os
+from datetime import timedelta
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,6 +23,9 @@ CORS_ALLOWED_ORIGINS = [
 
 # Application definition
 
+
+USER_CREATE_PASSWORD_RETYPE = True
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,11 +34,29 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'djoser',
+    'rest_framework_simplejwt',
     'corsheaders',
     'products',
     'django_filters',
     'drf_spectacular',
+    'rest_framework.authtoken',
+    'users',
 ]
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
+
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "USER_CREATE_PASSWORD_RETYPE": True,
+    "SERIALIZERS": {
+        "user_create": "users.serializers.UserCreateSerializer",
+        "user": "users.serializers.UserSerializer",
+    },
+}
+
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -100,6 +123,13 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
