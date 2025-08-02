@@ -13,26 +13,38 @@ export default function Navbar({ user, setUser }) {
     navigate("/");
   };
 
+  const navLinks = [
+    { label: "О нас", path: "/about" },
+    { label: "Оплата и доставка", path: "#" },
+    { label: "Как заказать", path: "#" },
+    { label: "Отзывы", path: "#" },
+    { label: "Руководство по цветам", path: "#" },
+    { label: "ЧаВо", path: "#" },
+  ];
+
   return (
     <header className="shadow-sm border-bottom">
       <div className="bg-light py-2 px-4 d-flex flex-wrap justify-content-between align-items-center small">
         <div className="d-flex flex-wrap gap-3">
-          {[
-            "О нас",
-            "Оплата и доставка",
-            "Как заказать",
-            "Отзывы",
-            "Руководство по цветам",
-            "ЧаВо",
-          ].map((label, index) => (
-            <a
-              key={index}
-              href="#"
-              className="text-secondary text-decoration-none hover-link"
-            >
-              {label}
-            </a>
-          ))}
+          {navLinks.map((item, index) =>
+            item.path === "#" ? (
+              <span
+                key={index}
+                className="text-secondary text-decoration-none hover-link"
+                style={{ cursor: "not-allowed", opacity: 0.6 }}
+              >
+                {item.label}
+              </span>
+            ) : (
+              <Link
+                key={index}
+                to={item.path}
+                className="text-secondary text-decoration-none hover-link"
+              >
+                {item.label}
+              </Link>
+            )
+          )}
         </div>
 
         {user ? (
@@ -57,7 +69,7 @@ export default function Navbar({ user, setUser }) {
         )}
       </div>
 
-      {/* Остальная разметка меню и поиска */}
+      {/* Остальная часть навбара (поиск, иконки и т.д.) — сюда можно добавить позже */}
     </header>
   );
 }

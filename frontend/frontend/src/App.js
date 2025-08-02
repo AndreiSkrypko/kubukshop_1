@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import RegisterForm from './components/RegisterForm';
 import LoginForm from './components/LoginForm';
 import Footer from './components/Footer';
+import About from "./components/About";
 
 // Главная страница
 function HomePage({ user }) {
@@ -96,6 +97,7 @@ function App() {
         <Route path="/" element={<HomePage user={user} />} />
         <Route path="/register" element={<RegisterForm setUser={setUser} />} />
         <Route path="/login" element={<LoginForm setUser={setUser} />} />
+        <Route path="/about" element={<About />} />
       </Routes>
       <Footer />
     </Router>
