@@ -1,0 +1,31 @@
+.topbar {
+  background: linear-gradient(90deg, #ff4d4d, #ff9a3d, #ffd86e); /* Красно-оранжево-жёлтый градиент */
+  color: #4a1a00; /* Тёмно-коричневый для контраста */
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 8px 0;
+  box-shadow: 0 4px 12px rgba(255, 80, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  user-select: none;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  z-index: 1030;
+}
+
+.topbar strong {
+  color: #d80000; /* Ярко-красный для выделения ключевых слов */
+  font-weight: 800;
+}
+
+.topbar:hover {
+  background: linear-gradient(90deg, #ff6666, #ffb84d, #fff2a8);
+  box-shadow: 0 6px 16px rgba(255, 0, 0, 0.3);
+  cursor: pointer;
+  letter-spacing: 0.1em;
+}
+
+.small {
+  font-size: 0.85rem;
+}
