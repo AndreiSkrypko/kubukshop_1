@@ -28,22 +28,69 @@ function RegisterForm({ setUser }) {
       return;
     }
 
+    // Проверка минимальной длины пароля
+    if (formData.password.length < 6) {
+      setMessage("Ошибка: Пароль должен содержать минимум 6 символов");
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      // Регистрация пользователя
       await axios.post("http://localhost:8000/auth/users/", formData);
-      setMessage("Регистрация прошла успешно! Теперь вы можете войти.");
+      
+      // Автоматический вход после регистрации
+      const loginData = {
+        email: formData.email,
+        password: formData.password
+      };
+      
+      const loginRes = await axios.post("http://localhost:8000/auth/token/login/", loginData);
+      const token = loginRes.data.auth_token;
+
+      // Получение данных пользователя
+      const userRes = await axios.get("http://localhost:8000/auth/users/me/", {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+
+      const user = userRes.data;
+      setUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+
+      setMessage("Регистрация прошла успешно! Вы автоматически вошли в систему.");
       setTimeout(() => {
-        navigate("/login");
+        navigate("/");
       }, 2000);
+      
     } catch (err) {
       const errorData = err?.response?.data;
       let errorMsg = "Произошла ошибка. Попробуйте ещё раз.";
       
       if (errorData) {
-        if (errorData.email) errorMsg = `Email: ${errorData.email[0]}`;
-        else if (errorData.username) errorMsg = `Имя пользователя: ${errorData.username[0]}`;
-        else if (errorData.password) errorMsg = `Пароль: ${errorData.password[0]}`;
-        else if (errorData.re_password) errorMsg = `Подтверждение пароля: ${errorData.re_password[0]}`;
-        else if (errorData.non_field_errors) errorMsg = errorData.non_field_errors[0];
+        if (errorData.email) {
+          errorMsg = `Email: ${errorData.email[0]}`;
+        } else if (errorData.username) {
+          errorMsg = `Имя пользователя: ${errorData.username[0]}`;
+        } else if (errorData.password) {
+          // Улучшенная обработка ошибок пароля
+          const passwordError = errorData.password[0];
+          if (passwordError.includes("too similar")) {
+            errorMsg = "Пароль не должен быть похож на email или имя пользователя";
+          } else if (passwordError.includes("too short")) {
+            errorMsg = "Пароль должен содержать минимум 6 символов";
+          } else if (passwordError.includes("too common")) {
+            errorMsg = "Пароль слишком простой. Выберите более сложный пароль";
+          } else {
+            errorMsg = `Пароль: ${passwordError}`;
+          }
+        } else if (errorData.re_password) {
+          errorMsg = `Подтверждение пароля: ${errorData.re_password[0]}`;
+        } else if (errorData.non_field_errors) {
+          errorMsg = errorData.non_field_errors[0];
+        }
       }
       
       setMessage("Ошибка: " + errorMsg);
@@ -91,7 +138,7 @@ function RegisterForm({ setUser }) {
                   <input
                     type="password"
                     name="password"
-                    placeholder="Пароль"
+                    placeholder="Пароль (минимум 6 символов)"
                     className="form-control"
                     onChange={handleChange}
                     required

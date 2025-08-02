@@ -13,18 +13,25 @@ function HomePage({ user }) {
       <div className="row">
         <div className="col-12 text-center">
           <h1 className="display-4 mb-4">Добро пожаловать в KubukShop</h1>
-          <p className="lead mb-4">
-            Ваш надежный партнер в мире качественных товаров
-          </p>
-          {!user && (
-            <div className="d-flex justify-content-center gap-3">
-              <a href="/login" className="btn btn-primary btn-lg">
-                Войти
-              </a>
-              <a href="/register" className="btn btn-outline-primary btn-lg">
-                Зарегистрироваться
-              </a>
+          {user ? (
+            <div className="alert alert-success">
+              <h4>Добро пожаловать, {user.username || user.email}!</h4>
+              <p className="mb-0">Вы успешно вошли в систему. Теперь вы можете пользоваться всеми возможностями нашего магазина.</p>
             </div>
+          ) : (
+            <>
+              <p className="lead mb-4">
+                Ваш надежный партнер в мире качественных товаров
+              </p>
+              <div className="d-flex justify-content-center gap-3">
+                <a href="/login" className="btn btn-primary btn-lg">
+                  Войти
+                </a>
+                <a href="/register" className="btn btn-outline-primary btn-lg">
+                  Зарегистрироваться
+                </a>
+              </div>
+            </>
           )}
         </div>
       </div>
