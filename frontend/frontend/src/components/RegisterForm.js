@@ -7,8 +7,10 @@ function RegisterForm({ setUser }) {
     username: "",
     email: "",
     password: "",
+    re_password: "",
   });
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -16,53 +18,109 @@ function RegisterForm({ setUser }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setMessage("");
+
+    // Проверка совпадения паролей
+    if (formData.password !== formData.re_password) {
+      setMessage("Ошибка: Пароли не совпадают");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await axios.post("http://localhost:8000/auth/users/", formData);
-      setMessage("Регистрация прошла успешно. Теперь вы можете войти.");
-      navigate("/login");
+      setMessage("Регистрация прошла успешно! Теперь вы можете войти.");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.email?.[0] ||
-        err?.response?.data?.password?.[0] ||
-        err?.response?.data?.non_field_errors?.[0] ||
-        "Произошла ошибка. Попробуйте ещё раз.";
+      const errorData = err?.response?.data;
+      let errorMsg = "Произошла ошибка. Попробуйте ещё раз.";
+      
+      if (errorData) {
+        if (errorData.email) errorMsg = `Email: ${errorData.email[0]}`;
+        else if (errorData.username) errorMsg = `Имя пользователя: ${errorData.username[0]}`;
+        else if (errorData.password) errorMsg = `Пароль: ${errorData.password[0]}`;
+        else if (errorData.re_password) errorMsg = `Подтверждение пароля: ${errorData.re_password[0]}`;
+        else if (errorData.non_field_errors) errorMsg = errorData.non_field_errors[0];
+      }
+      
       setMessage("Ошибка: " + errorMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="container mt-4">
-      <h3>Регистрация</h3>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Имя пользователя"
-          className="form-control mb-2"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="form-control mb-2"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Пароль"
-          className="form-control mb-2"
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" className="btn btn-success">
-          Зарегистрироваться
-        </button>
-      </form>
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-body">
+              <h3 className="card-title text-center mb-4">Регистрация</h3>
+              {message && (
+                <div className={`alert ${message.includes('успешно') ? 'alert-success' : 'alert-danger'}`}>
+                  {message}
+                </div>
+              )}
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Имя пользователя"
+                    className="form-control"
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className="form-control"
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Пароль"
+                    className="form-control"
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="password"
+                    name="re_password"
+                    placeholder="Подтвердите пароль"
+                    className="form-control"
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="btn btn-success w-100"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Регистрация..." : "Зарегистрироваться"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 function LoginForm({ setUser }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -12,6 +13,9 @@ function LoginForm({ setUser }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setMessage("");
+
     try {
       const res = await axios.post("http://localhost:8000/auth/token/login/", formData);
       const token = res.data.auth_token;
@@ -29,38 +33,72 @@ function LoginForm({ setUser }) {
 
       navigate("/");
     } catch (err) {
-      setMessage(
-        "Ошибка входа: " +
-          (err?.response?.data?.non_field_errors?.[0] || "Проверьте email и пароль.")
-      );
+      const errorData = err?.response?.data;
+      let errorMsg = "Проверьте email и пароль.";
+      
+      if (errorData) {
+        if (errorData.non_field_errors) {
+          errorMsg = errorData.non_field_errors[0];
+        } else if (errorData.email) {
+          errorMsg = `Email: ${errorData.email[0]}`;
+        } else if (errorData.password) {
+          errorMsg = `Пароль: ${errorData.password[0]}`;
+        }
+      }
+      
+      setMessage("Ошибка входа: " + errorMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="container mt-4">
-      <h3>Вход</h3>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="form-control mb-2"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Пароль"
-          className="form-control mb-2"
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" className="btn btn-primary">
-          Войти
-        </button>
-      </form>
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-body">
+              <h3 className="card-title text-center mb-4">Вход в систему</h3>
+              {message && (
+                <div className="alert alert-danger">
+                  {message}
+                </div>
+              )}
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className="form-control"
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="mb-3">
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Пароль"
+                    className="form-control"
+                    onChange={handleChange}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary w-100"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Вход..." : "Войти"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

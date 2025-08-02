@@ -5,5 +5,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('products.urls')),
     path('auth/', include('djoser.urls')),       # регистрация, активация и др.
-    path('auth/', include('djoser.urls.jwt')),   # JWT login/logout
+    path('auth/', include('djoser.urls.authtoken')),   # токен login/logout
 ]

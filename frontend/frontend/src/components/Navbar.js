@@ -1,6 +1,6 @@
 import React from "react";
 import { FaHeart, FaShoppingCart, FaFacebook, FaInstagram, FaVk } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "../css/Navbar.css";
 
 export default function Navbar({ user, setUser }) {
@@ -8,8 +8,9 @@ export default function Navbar({ user, setUser }) {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
-    navigate("/"); // Перенаправление после выхода
+    navigate("/");
   };
 
   return (
@@ -36,15 +37,23 @@ export default function Navbar({ user, setUser }) {
 
         {user ? (
           <div className="d-flex gap-3 align-items-center">
-            <span className="text-success">Здравствуйте, {user.username}!</span>
+            <span className="text-success">
+              Здравствуйте, {user.username || user.email}!
+            </span>
             <button onClick={handleLogout} className="btn btn-outline-danger btn-sm">
               Выйти
             </button>
           </div>
         ) : (
-          <a href="/register" className="text-secondary text-decoration-none">
-            Войти / Зарегистрироваться
-          </a>
+          <div className="d-flex gap-2">
+            <Link to="/login" className="text-secondary text-decoration-none">
+              Войти
+            </Link>
+            <span className="text-secondary">|</span>
+            <Link to="/register" className="text-secondary text-decoration-none">
+              Зарегистрироваться
+            </Link>
+          </div>
         )}
       </div>
 
