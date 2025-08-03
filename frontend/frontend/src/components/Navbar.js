@@ -15,6 +15,7 @@ export default function Navbar({ user, setUser }) {
 
   const navLinks = [
     { label: "О нас", path: "/about" },
+    { label: "Магазин LEGO", path: "/lego-shop" },
     { label: "Оплата и доставка", path: "#" },
     { label: "Как заказать", path: "#" },
     { label: "Отзывы", path: "#" },

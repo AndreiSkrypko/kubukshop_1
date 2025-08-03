@@ -1,0 +1,47 @@
+.lego-shop-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding-top: 0;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .lego-shop-page {
+    padding-top: 0;
+  }
+  
+  .sidebar {
+    top: 80px;
+    height: calc(100vh - 80px);
+    width: 100%;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.show {
+    transform: translateX(0);
+  }
+  
+  .lego-products {
+    margin-left: 0;
+    padding: 15px;
+  }
+}
+
+/* Стили для скроллбара страницы */
+.lego-shop-page::-webkit-scrollbar {
+  width: 8px;
+}
+
+.lego-shop-page::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.lego-shop-page::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.lego-shop-page::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+} 
