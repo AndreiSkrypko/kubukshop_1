@@ -6,6 +6,9 @@ import RegisterForm from './components/RegisterForm';
 import LoginForm from './components/LoginForm';
 import Footer from './components/Footer';
 import About from "./components/About";
+import Sidebar from './components/Sidebar';
+import LegoProducts from './components/LegoProducts';
+import './css/LegoShop.css';
 
 // Главная страница
 function HomePage({ user }) {
@@ -73,6 +76,25 @@ function HomePage({ user }) {
   );
 }
 
+// Страница товаров LEGO
+function LegoShopPage({ user }) {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const handleCategorySelect = (categoryId) => {
+    setSelectedCategory(categoryId);
+  };
+
+  return (
+    <div className="lego-shop-page">
+      <Sidebar 
+        onCategorySelect={handleCategorySelect}
+        selectedCategory={selectedCategory}
+      />
+      <LegoProducts selectedCategory={selectedCategory} />
+    </div>
+  );
+}
+
 function App() {
   const [user, setUser] = useState(null);
 
@@ -95,6 +117,7 @@ function App() {
       <Navbar user={user} setUser={setUser} />
       <Routes>
         <Route path="/" element={<HomePage user={user} />} />
+        <Route path="/lego-shop" element={<LegoShopPage user={user} />} />
         <Route path="/register" element={<RegisterForm setUser={setUser} />} />
         <Route path="/login" element={<LoginForm setUser={setUser} />} />
         <Route path="/about" element={<About />} />
