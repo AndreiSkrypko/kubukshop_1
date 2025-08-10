@@ -1,29 +1,68 @@
+/* Основные стили для страницы LEGO магазина */
 .lego-shop-page {
   min-height: 100vh;
-  background: #f8f9fa;
-  padding-top: 0;
+  background-color: #f8f9fa;
 }
 
-/* Адаптивность для мобильных устройств */
+.lego-shop-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.lego-shop-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.lego-shop-header h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.lego-shop-header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.lego-shop-content {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
   .lego-shop-page {
-    padding-top: 0;
+    padding: 10px;
   }
   
-  .sidebar {
-    top: 80px;
-    height: calc(100vh - 80px);
-    width: 100%;
-    transform: translateX(-100%);
+  .lego-shop-header {
+    padding: 20px;
   }
   
-  .sidebar.show {
-    transform: translateX(0);
+  .lego-shop-header h1 {
+    font-size: 2rem;
   }
   
-  .lego-products {
-    margin-left: 0;
-    padding: 15px;
+  .lego-shop-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  
+  .lego-shop-content {
+    padding: 1rem;
   }
 }
 

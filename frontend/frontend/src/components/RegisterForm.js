@@ -56,9 +56,13 @@ function RegisterForm({ setUser }) {
       });
 
       const user = userRes.data;
-      setUser(user);
+      
+      // Сохраняем в localStorage
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
+      
+      // Обновляем состояние в App.js
+      setUser(user);
 
       setMessage("Регистрация прошла успешно! Вы автоматически вошли в систему.");
       setTimeout(() => {

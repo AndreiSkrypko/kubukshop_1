@@ -6,8 +6,9 @@ import RegisterForm from './components/RegisterForm';
 import LoginForm from './components/LoginForm';
 import Footer from './components/Footer';
 import About from "./components/About";
-import Sidebar from './components/Sidebar';
 import LegoProducts from './components/LegoProducts';
+import Sidebar from './components/Sidebar';
+import Cart from './components/Cart';
 import './css/LegoShop.css';
 
 // Главная страница
@@ -77,7 +78,7 @@ function HomePage({ user }) {
 }
 
 // Страница товаров LEGO
-function LegoShopPage({ user }) {
+function LegoShopPage({ user, openCart }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleCategorySelect = (categoryId) => {
@@ -86,42 +87,58 @@ function LegoShopPage({ user }) {
 
   return (
     <div className="lego-shop-page">
-      <Sidebar 
-        onCategorySelect={handleCategorySelect}
-        selectedCategory={selectedCategory}
-      />
-      <LegoProducts selectedCategory={selectedCategory} />
+      <div className="lego-shop-container">
+        <Sidebar 
+          onCategorySelect={handleCategorySelect}
+          selectedCategory={selectedCategory}
+        />
+        <div className="lego-shop-content">
+          <LegoProducts selectedCategory={selectedCategory} openCart={openCart} />
+        </div>
+      </div>
     </div>
   );
 }
 
 function App() {
   const [user, setUser] = useState(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
+    
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
       } catch (error) {
         console.error('Ошибка при загрузке пользователя:', error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
       }
     }
   }, []);
 
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+
   return (
     <Router>
-      <TopBar />
-      <Navbar user={user} setUser={setUser} />
+      <TopBar user={user} openCart={openCart} />
+      <Navbar user={user} setUser={setUser} openCart={openCart} />
       <Routes>
         <Route path="/" element={<HomePage user={user} />} />
-        <Route path="/lego-shop" element={<LegoShopPage user={user} />} />
+        <Route path="/lego-shop" element={<LegoShopPage user={user} openCart={openCart} />} />
         <Route path="/register" element={<RegisterForm setUser={setUser} />} />
         <Route path="/login" element={<LoginForm setUser={setUser} />} />
         <Route path="/about" element={<About />} />
       </Routes>
+      
+      {/* Cart Modal */}
+      {isCartOpen && user && (
+        <Cart user={user} onClose={closeCart} />
+      )}
+      
       <Footer />
     </Router>
   );

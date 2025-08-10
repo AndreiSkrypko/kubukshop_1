@@ -1,153 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../css/Sidebar.css';
 
 export default function Sidebar({ onCategorySelect, selectedCategory }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const legoCategories = [
-    {
-      id: 'bricks',
-      name: 'Кубики',
-      icon: '🧱',
-      subcategories: [
-        { id: '2x2', name: '2x2' },
-        { id: '2x4', name: '2x4' },
-        { id: '1x2', name: '1x2' },
-        { id: '1x4', name: '1x4' },
-        { id: '1x1', name: '1x1' }
-      ]
-    },
-    {
-      id: 'plates',
-      name: 'Пластины',
-      icon: '📏',
-      subcategories: [
-        { id: 'plate-2x2', name: 'Пластина 2x2' },
-        { id: 'plate-2x4', name: 'Пластина 2x4' },
-        { id: 'plate-1x2', name: 'Пластина 1x2' },
-        { id: 'plate-1x4', name: 'Пластина 1x4' }
-      ]
-    },
-    {
-      id: 'axles',
-      name: 'Оси',
-      icon: '⚙️',
-      subcategories: [
-        { id: 'axle-2', name: 'Ось 2' },
-        { id: 'axle-3', name: 'Ось 3' },
-        { id: 'axle-4', name: 'Ось 4' },
-        { id: 'axle-6', name: 'Ось 6' },
-        { id: 'axle-8', name: 'Ось 8' }
-      ]
-    },
-    {
-      id: 'gears',
-      name: 'Шестерни',
-      icon: '⚙️',
-      subcategories: [
-        { id: 'gear-8', name: 'Шестерня 8 зубьев' },
-        { id: 'gear-16', name: 'Шестерня 16 зубьев' },
-        { id: 'gear-24', name: 'Шестерня 24 зуба' },
-        { id: 'gear-40', name: 'Шестерня 40 зубьев' }
-      ]
-    },
-    {
-      id: 'wheels',
-      name: 'Колеса',
-      icon: '🛞',
-      subcategories: [
-        { id: 'wheel-small', name: 'Маленькое колесо' },
-        { id: 'wheel-medium', name: 'Среднее колесо' },
-        { id: 'wheel-large', name: 'Большое колесо' },
-        { id: 'wheel-thin', name: 'Тонкое колесо' }
-      ]
-    },
-    {
-      id: 'connectors',
-      name: 'Соединители',
-      icon: '🔗',
-      subcategories: [
-        { id: 'connector-1', name: 'Соединитель 1' },
-        { id: 'connector-2', name: 'Соединитель 2' },
-        { id: 'connector-3', name: 'Соединитель 3' },
-        { id: 'connector-4', name: 'Соединитель 4' }
-      ]
-    },
-    {
-      id: 'special',
-      name: 'Специальные',
-      icon: '⭐',
-      subcategories: [
-        { id: 'hinge', name: 'Петля' },
-        { id: 'bracket', name: 'Кронштейн' },
-        { id: 'beam', name: 'Балка' },
-        { id: 'angle', name: 'Уголок' }
-      ]
-    }
-  ];
+  const API_BASE_URL = 'http://localhost:8000/api';
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${API_BASE_URL}/categories/`);
+        if (!response.ok) {
+          throw new Error('Ошибка загрузки категорий');
+        }
+        const data = await response.json();
+        setCategories(data);
+      } catch (err) {
+        console.error('Ошибка загрузки категорий:', err);
+        setError('Не удалось загрузить категории');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleCategoryClick = (categoryId) => {
     onCategorySelect(categoryId);
   };
 
-  const handleSubcategoryClick = (categoryId, subcategoryId) => {
-    onCategorySelect(`${categoryId}-${subcategoryId}`);
+  const handleShowAllProducts = () => {
+    onCategorySelect(null);
   };
 
-  return (
-    <>
-      {/* Мобильная кнопка меню */}
-      <div className="mobile-menu-toggle d-md-none">
+  if (loading) {
+    return (
+      <div className="sidebar-loading">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Загрузка...</span>
+        </div>
+        <p>Загружаем категории...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="sidebar-error">
+        <div className="error-icon">⚠️</div>
+        <h3>Ошибка загрузки</h3>
+        <p>{error}</p>
         <button 
-          className="btn btn-primary"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="btn btn-primary btn-sm"
+          onClick={() => window.location.reload()}
         >
-          ☰ Меню LEGO
+          Попробовать снова
         </button>
       </div>
-      
-      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileMenuOpen ? 'show' : ''}`}>
-        <div className="sidebar-header">
-          <h5 className="sidebar-title">
-            {!isCollapsed && <span>Детали LEGO</span>}
-          </h5>
-          <button 
-            className="sidebar-toggle"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-          >
-            {isCollapsed ? '→' : '←'}
-          </button>
-        </div>
+    );
+  }
+
+  return (
+    <div className="sidebar">
+      <div className="sidebar-header">
+        <h3>Категории</h3>
+      </div>
       
       <div className="sidebar-content">
-        {legoCategories.map((category) => (
-          <div key={category.id} className="category-item">
-            <div 
-              className={`category-header ${selectedCategory === category.id ? 'active' : ''}`}
-              onClick={() => handleCategoryClick(category.id)}
-            >
-              <span className="category-icon">{category.icon}</span>
-              {!isCollapsed && <span className="category-name">{category.name}</span>}
-            </div>
-            
-            {!isCollapsed && selectedCategory === category.id && (
-              <div className="subcategories">
-                {category.subcategories.map((subcategory) => (
-                  <div 
-                    key={subcategory.id}
-                    className="subcategory-item"
-                    onClick={() => handleSubcategoryClick(category.id, subcategory.id)}
-                  >
-                    {subcategory.name}
-                  </div>
-                ))}
-              </div>
-            )}
+        <div 
+          className={`category-item ${!selectedCategory ? 'active' : ''}`}
+          onClick={handleShowAllProducts}
+        >
+          <div className="category-icon">🏠</div>
+          <span>Все товары</span>
+        </div>
+        
+        {categories.map((category) => (
+          <div
+            key={category.id}
+            className={`category-item ${selectedCategory === category.id ? 'active' : ''}`}
+            onClick={() => handleCategoryClick(category.id)}
+          >
+            <div className="category-icon">📦</div>
+            <span>{category.name}</span>
+            <span className="products-count">({category.products_count || 0})</span>
           </div>
         ))}
       </div>
     </div>
-    </>
   );
 } 

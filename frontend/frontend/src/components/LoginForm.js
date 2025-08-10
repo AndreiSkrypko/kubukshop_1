@@ -27,9 +27,13 @@ function LoginForm({ setUser }) {
       });
 
       const user = userRes.data;
-      setUser(user);
+      
+      // Сохраняем в localStorage
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
+      
+      // Обновляем состояние в App.js
+      setUser(user);
 
       navigate("/");
     } catch (err) {
