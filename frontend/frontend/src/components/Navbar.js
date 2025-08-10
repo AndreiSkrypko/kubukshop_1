@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaHeart, FaShoppingCart, FaSearch, FaUser, FaBars, FaTimes } from "react-icons/fa";
+import { FaHeart, FaSearch, FaUser, FaBars, FaTimes } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import "../css/Navbar.css";
 
@@ -45,8 +45,8 @@ export default function Navbar({ user, setUser, openCart }) {
   const navLinks = [
     { label: "О нас", path: "/about" },
     { label: "Магазин LEGO", path: "/lego-shop" },
-    { label: "Оплата и доставка", path: "#" },
-    { label: "Как заказать", path: "#" },
+    // { label: "Оплата и доставка", path: "#" }, // Убрано по вашему запросу
+    // { label: "Как заказать", path: "#" }, // Убрано по вашему запросу
     // { label: "Отзывы", path: "#" }, // Убрано по вашему запросу
     // { label: "Руководство по цветам", path: "#" }, // Убрано по вашему запросу
     // { label: "ЧаВо", path: "#" }, // Убрано по вашему запросу
@@ -86,10 +86,21 @@ export default function Navbar({ user, setUser, openCart }) {
 
         {/* Навигационные ссылки */}
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
-          <ul className="navbar-nav">
+          <ul className="navbar-nav" style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: '10px',
+            width: '100%'
+          }}>
             {navLinks.map((link, index) => (
               <li key={index} className="nav-item">
-                <Link className="nav-link" to={link.path} onClick={closeMenu}>
+                <Link 
+                  className={`nav-link ${link.label === "Магазин LEGO" ? 'lego-shop-btn' : ''} ${link.label === "О нас" ? 'about-btn' : ''}`} 
+                  to={link.path} 
+                  onClick={closeMenu}
+                >
                   {link.label}
                 </Link>
               </li>
@@ -109,16 +120,7 @@ export default function Navbar({ user, setUser, openCart }) {
             </div>
           )}
 
-          {/* Корзина */}
-          {user && (
-            <div className="action-item">
-              <button className="action-button cart-btn" onClick={openCart}>
-                <FaShoppingCart className="action-icon" />
-                <span className="action-text">Корзина</span>
-                <span className="cart-badge">0</span>
-              </button>
-            </div>
-          )}
+          {/* Корзина убрана - достаточно в топ баре */}
 
           {/* Пользователь */}
           {user ? (
