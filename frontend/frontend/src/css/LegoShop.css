@@ -2,6 +2,7 @@
 .lego-shop-page {
   min-height: 100vh;
   background-color: #f8f9fa;
+  padding-top: 120px; /* Отступ для TopBar (40px) + Navbar (80px) */
 }
 
 .lego-shop-container {

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "../css/Auth.css";
 
 function LoginForm({ setUser }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -57,48 +58,50 @@ function LoginForm({ setUser }) {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h3 className="card-title text-center mb-4">Вход в систему</h3>
-              {message && (
-                <div className="alert alert-danger">
-                  {message}
-                </div>
-              )}
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="form-control"
-                    onChange={handleChange}
-                    required
+    <div className="auth-page">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card">
+              <div className="card-body">
+                <h3 className="card-title text-center mb-4">Вход в систему</h3>
+                {message && (
+                  <div className="alert alert-danger">
+                    {message}
+                  </div>
+                )}
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      className="form-control"
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Пароль"
+                      className="form-control"
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary w-100"
                     disabled={isLoading}
-                  />
-                </div>
-                <div className="mb-3">
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Пароль"
-                    className="form-control"
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary w-100"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Вход..." : "Войти"}
-                </button>
-              </form>
+                  >
+                    {isLoading ? "Вход..." : "Войти"}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>

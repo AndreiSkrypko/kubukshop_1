@@ -10,8 +10,11 @@
   text-align: center;
   user-select: none;
   transition: all 0.3s ease-in-out;
-  position: relative;
-  z-index: 1030;
+  position: fixed; /* Фиксированное позиционирование */
+  top: 0; /* Прикрепляем к верху экрана */
+  left: 0; /* Прикрепляем к левому краю */
+  right: 0; /* Растягиваем на всю ширину */
+  z-index: 1030; /* Высокий z-index для отображения поверх других элементов */
 }
 
 .topbar strong {

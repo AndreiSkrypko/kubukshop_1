@@ -1,0 +1,27 @@
+/* Стили для страницы "О нас" */
+.about-page {
+  padding-top: 120px; /* Отступ для TopBar (40px) + Navbar (80px) */
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.about-page .container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.about-page h1 {
+  color: #333;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.about-page p {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  text-align: center;
+}

@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  padding-top: 120px; /* Отступ для TopBar (40px) + Navbar (80px) */
 }
 
 code {

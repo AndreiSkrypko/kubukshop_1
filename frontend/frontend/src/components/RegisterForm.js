@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "../css/Auth.css";
 
 function RegisterForm({ setUser }) {
   const [formData, setFormData] = useState({
@@ -104,70 +105,72 @@ function RegisterForm({ setUser }) {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h3 className="card-title text-center mb-4">Регистрация</h3>
-              {message && (
-                <div className={`alert ${message.includes('успешно') ? 'alert-success' : 'alert-danger'}`}>
-                  {message}
-                </div>
-              )}
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <input
-                    type="text"
-                    name="username"
-                    placeholder="Имя пользователя"
-                    className="form-control"
-                    onChange={handleChange}
-                    required
+    <div className="auth-page">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card">
+              <div className="card-body">
+                <h3 className="card-title text-center mb-4">Регистрация</h3>
+                {message && (
+                  <div className={`alert ${message.includes('успешно') ? 'alert-success' : 'alert-danger'}`}>
+                    {message}
+                  </div>
+                )}
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <input
+                      type="text"
+                      name="username"
+                      placeholder="Имя пользователя"
+                      className="form-control"
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      className="form-control"
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Пароль (минимум 6 символов)"
+                      className="form-control"
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <input
+                      type="password"
+                      name="re_password"
+                      placeholder="Подтвердите пароль"
+                      className="form-control"
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    className="btn btn-success w-100"
                     disabled={isLoading}
-                  />
-                </div>
-                <div className="mb-3">
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="form-control"
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="mb-3">
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Пароль (минимум 6 символов)"
-                    className="form-control"
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="mb-3">
-                  <input
-                    type="password"
-                    name="re_password"
-                    placeholder="Подтвердите пароль"
-                    className="form-control"
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  className="btn btn-success w-100"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Регистрация..." : "Зарегистрироваться"}
-                </button>
-              </form>
+                  >
+                    {isLoading ? "Регистрация..." : "Зарегистрироваться"}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
