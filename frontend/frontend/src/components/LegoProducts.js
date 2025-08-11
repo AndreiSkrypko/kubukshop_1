@@ -13,14 +13,17 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
   const [totalCount, setTotalCount] = useState(0);
   const [notification, setNotification] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   const API_BASE_URL = 'http://localhost:8000/api';
 
-  // Извлекаем параметр поиска из URL
+  // Извлекаем параметры из URL
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchParam = urlParams.get('search');
+    const productParam = urlParams.get('product');
     setSearchQuery(searchParam || '');
+    setSelectedProductId(productParam ? parseInt(productParam) : null);
   }, [location.search]);
 
   // Загрузка категорий для отображения названий
@@ -48,7 +51,10 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
         setError(null);
         
         let url;
-        if (searchQuery) {
+        if (selectedProductId) {
+          // Если выбран конкретный товар, загружаем его
+          url = `${API_BASE_URL}/products/${selectedProductId}/`;
+        } else if (searchQuery) {
           // Если есть поисковый запрос, используем API поиска
           url = `${API_BASE_URL}/products/search/?q=${encodeURIComponent(searchQuery)}&page=${currentPage}`;
         } else if (selectedCategory) {
@@ -65,10 +71,18 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
         }
         const data = await response.json();
         
-        // Обработка пагинированных данных
-        setProducts(data.results || data);
-        setTotalCount(data.count || data.length);
-        setTotalPages(Math.ceil((data.count || data.length) / 10));
+        // Обработка данных в зависимости от типа запроса
+        if (selectedProductId) {
+          // Если загружаем конкретный товар, создаем массив с одним элементом
+          setProducts([data]);
+          setTotalCount(1);
+          setTotalPages(1);
+        } else {
+          // Обработка пагинированных данных
+          setProducts(data.results || data);
+          setTotalCount(data.count || data.length);
+          setTotalPages(Math.ceil((data.count || data.length) / 10));
+        }
       } catch (err) {
         console.error('Ошибка загрузки товаров:', err);
         setError('Не удалось загрузить товары. Проверьте, запущен ли Django сервер.');
@@ -81,7 +95,7 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
     };
 
     fetchProducts();
-  }, [selectedCategory, currentPage, searchQuery]);
+  }, [selectedCategory, currentPage, searchQuery, selectedProductId]);
 
   // Сброс страницы при смене категории или поиска
   useEffect(() => {
@@ -149,8 +163,9 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
   };
 
   const handleShowAllProducts = () => {
-    // Сброс выбранной категории и поиска
+    // Сброс выбранной категории, поиска и товара
     setSearchQuery('');
+    setSelectedProductId(null);
     if (onResetCategory) {
       onResetCategory();
     }
@@ -160,6 +175,7 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
 
   const handleClearSearch = () => {
     setSearchQuery('');
+    setSelectedProductId(null);
     if (onResetCategory) {
       onResetCategory();
     }
@@ -322,15 +338,28 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
       
       <div className="products-header">
         <h2>
-          {searchQuery 
-            ? `Результаты поиска по названию "${searchQuery}" (найдено ${totalCount} товаров)`
-            : selectedCategory 
-              ? `Товары в категории "${selectedCategoryName || 'Неизвестная категория'}"`
-              : 'Все товары'
+          {selectedProductId 
+            ? `Выбранный товар`
+            : searchQuery 
+              ? `Результаты поиска по названию "${searchQuery}" (найдено ${totalCount} товаров)`
+              : selectedCategory 
+                ? `Товары в категории "${selectedCategoryName || 'Неизвестная категория'}"`
+                : 'Все товары'
           }
         </h2>
         <div className="header-buttons">
-          {searchQuery && (
+          {selectedProductId && (
+            <button 
+              className="btn btn-outline-secondary me-2"
+              onClick={() => {
+                setSelectedProductId(null);
+                window.history.pushState({}, '', '/lego-shop');
+              }}
+            >
+              Показать все товары
+            </button>
+          )}
+          {searchQuery && !selectedProductId && (
             <button 
               className="btn btn-outline-secondary me-2"
               onClick={handleClearSearch}
@@ -338,7 +367,7 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
               Очистить поиск
             </button>
           )}
-          {selectedCategory && !searchQuery && (
+          {selectedCategory && !searchQuery && !selectedProductId && (
             <button 
               className="btn btn-outline-primary"
               onClick={handleShowAllProducts}
@@ -354,14 +383,27 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
           <div className="no-products-icon">📦</div>
           <h3>Товары не найдены</h3>
           <p>
-            {searchQuery 
-              ? `По запросу "${searchQuery}" ничего не найдено. Попробуйте изменить поисковый запрос.`
-              : selectedCategory 
-                ? 'В выбранной категории пока нет товаров'
-                : 'В магазине пока нет товаров'
+            {selectedProductId
+              ? 'Выбранный товар не найден или был удален.'
+              : searchQuery 
+                ? `По запросу "${searchQuery}" ничего не найдено. Попробуйте изменить поисковый запрос.`
+                : selectedCategory 
+                  ? 'В выбранной категории пока нет товаров'
+                  : 'В магазине пока нет товаров'
             }
           </p>
-          {searchQuery && (
+          {selectedProductId && (
+            <button 
+              className="btn btn-primary"
+              onClick={() => {
+                setSelectedProductId(null);
+                window.history.pushState({}, '', '/lego-shop');
+              }}
+            >
+              Показать все товары
+            </button>
+          )}
+          {searchQuery && !selectedProductId && (
             <button 
               className="btn btn-primary"
               onClick={handleClearSearch}

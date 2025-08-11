@@ -72,7 +72,7 @@ export default function Navbar({ user, setUser, openCart }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Перенаправляем на страницу товаров с параметром поиска
+      // При нажатии кнопки "Найти" переходим на страницу с результатами поиска
       navigate(`/lego-shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery(""); // Очищаем поле поиска
       setShowSearchResults(false); // Скрываем результаты поиска
@@ -80,7 +80,9 @@ export default function Navbar({ user, setUser, openCart }) {
   };
 
   const handleProductSelect = (product) => {
-    navigate(`/lego-shop?search=${encodeURIComponent(product.name)}`);
+    // При клике на товар в результатах поиска, переходим на страницу с этим конкретным товаром
+    // Используем ID товара для точного поиска
+    navigate(`/lego-shop?product=${product.id}`);
     setSearchQuery("");
     setShowSearchResults(false);
   };
@@ -172,7 +174,12 @@ export default function Navbar({ user, setUser, openCart }) {
                 <div className="search-results-footer">
                   <button 
                     className="search-results-more"
-                    onClick={handleSearch}
+                    onClick={() => {
+                      // При клике на "Показать все результаты" переходим на страницу с текущим поисковым запросом
+                      navigate(`/lego-shop?search=${encodeURIComponent(searchQuery.trim())}`);
+                      setSearchQuery("");
+                      setShowSearchResults(false);
+                    }}
                   >
                     Показать все результаты ({searchResults.length})
                   </button>
