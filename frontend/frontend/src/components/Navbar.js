@@ -11,6 +11,9 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,6 +59,9 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
       if (!event.target.closest('.navbar-search')) {
         setShowSearchResults(false);
       }
+      if (!event.target.closest('.user-dropdown')) {
+        setIsUserDropdownOpen(false);
+      }
     };
 
     document.addEventListener('click', handleClickOutside);
@@ -93,6 +99,14 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  };
+
+  const closeUserDropdown = () => {
+    setIsUserDropdownOpen(false);
   };
 
   const navLinks = [
@@ -241,13 +255,19 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
           {/* Пользователь */}
           {user ? (
             <div className="action-item user-dropdown">
-              <button className="action-button user-btn">
+              <button 
+                className="action-button user-btn" 
+                onClick={toggleUserDropdown}
+              >
                 <FaUser className="action-icon" />
                 <span className="action-text">{user.username || user.email}</span>
               </button>
-              <div className="dropdown-menu">
-                <Link to="/profile" className="dropdown-item" onClick={closeMenu}>Личный кабинет</Link>
-                <Link to="/orders" className="dropdown-item" onClick={closeMenu}>Мои заказы</Link>
+              
+
+              
+              <div className={`dropdown-menu ${isUserDropdownOpen ? 'show' : ''}`}>
+                <Link to="/profile" className="dropdown-item" onClick={closeUserDropdown}>Личный кабинет</Link>
+                <Link to="/orders" className="dropdown-item" onClick={closeUserDropdown}>Мои заказы</Link>
                 <div className="dropdown-divider"></div>
                 <button className="dropdown-item" onClick={handleLogout}>
                   Выйти
