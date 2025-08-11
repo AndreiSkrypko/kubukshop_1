@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import '../css/LegoProducts.css';
 
-export default function LegoProducts({ selectedCategory, openCart }) {
+export default function LegoProducts({ selectedCategory, openCart, onResetCategory }) {
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,8 +12,16 @@ export default function LegoProducts({ selectedCategory, openCart }) {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [notification, setNotification] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const API_BASE_URL = 'http://localhost:8000/api';
+
+  // Извлекаем параметр поиска из URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchParam = urlParams.get('search');
+    setSearchQuery(searchParam || '');
+  }, [location.search]);
 
   // Загрузка категорий для отображения названий
   useEffect(() => {
@@ -37,9 +47,16 @@ export default function LegoProducts({ selectedCategory, openCart }) {
         setLoading(true);
         setError(null);
         
-        let url = `${API_BASE_URL}/products/?page=${currentPage}`;
-        if (selectedCategory) {
-          url += `&category=${selectedCategory}`;
+        let url;
+        if (searchQuery) {
+          // Если есть поисковый запрос, используем API поиска
+          url = `${API_BASE_URL}/products/search/?q=${encodeURIComponent(searchQuery)}&page=${currentPage}`;
+        } else if (selectedCategory) {
+          // Если выбрана категория, загружаем товары категории
+          url = `${API_BASE_URL}/categories/${selectedCategory}/products/?page=${currentPage}`;
+        } else {
+          // Иначе загружаем все товары
+          url = `${API_BASE_URL}/products/?page=${currentPage}`;
         }
         
         const response = await fetch(url);
@@ -64,12 +81,12 @@ export default function LegoProducts({ selectedCategory, openCart }) {
     };
 
     fetchProducts();
-  }, [selectedCategory, currentPage]);
+  }, [selectedCategory, currentPage, searchQuery]);
 
-  // Сброс страницы при смене категории
+  // Сброс страницы при смене категории или поиска
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory]);
+  }, [selectedCategory, searchQuery]);
 
   const handleAddToCart = async (product) => {
     try {
@@ -132,9 +149,22 @@ export default function LegoProducts({ selectedCategory, openCart }) {
   };
 
   const handleShowAllProducts = () => {
-    // Сброс выбранной категории через изменение URL
-    window.history.pushState({}, '', '/lego-products');
-    window.location.reload();
+    // Сброс выбранной категории и поиска
+    setSearchQuery('');
+    if (onResetCategory) {
+      onResetCategory();
+    }
+    // Очищаем URL от параметров поиска
+    window.history.pushState({}, '', '/lego-shop');
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    if (onResetCategory) {
+      onResetCategory();
+    }
+    // Очищаем URL от параметров поиска
+    window.history.pushState({}, '', '/lego-shop');
   };
 
   const handlePageChange = (page) => {
@@ -292,19 +322,31 @@ export default function LegoProducts({ selectedCategory, openCart }) {
       
       <div className="products-header">
         <h2>
-          {selectedCategory 
-            ? `Товары в категории "${selectedCategoryName || 'Неизвестная категория'}"`
-            : 'Все товары'
+          {searchQuery 
+            ? `Результаты поиска по названию "${searchQuery}" (найдено ${totalCount} товаров)`
+            : selectedCategory 
+              ? `Товары в категории "${selectedCategoryName || 'Неизвестная категория'}"`
+              : 'Все товары'
           }
         </h2>
-        {selectedCategory && (
-          <button 
-            className="btn btn-outline-primary"
-            onClick={handleShowAllProducts}
-          >
-            Показать все товары
-          </button>
-        )}
+        <div className="header-buttons">
+          {searchQuery && (
+            <button 
+              className="btn btn-outline-secondary me-2"
+              onClick={handleClearSearch}
+            >
+              Очистить поиск
+            </button>
+          )}
+          {selectedCategory && !searchQuery && (
+            <button 
+              className="btn btn-outline-primary"
+              onClick={handleShowAllProducts}
+            >
+              Показать все товары
+            </button>
+          )}
+        </div>
       </div>
 
       {products.length === 0 ? (
@@ -312,11 +354,21 @@ export default function LegoProducts({ selectedCategory, openCart }) {
           <div className="no-products-icon">📦</div>
           <h3>Товары не найдены</h3>
           <p>
-            {selectedCategory 
-              ? 'В выбранной категории пока нет товаров'
-              : 'В магазине пока нет товаров'
+            {searchQuery 
+              ? `По запросу "${searchQuery}" ничего не найдено. Попробуйте изменить поисковый запрос.`
+              : selectedCategory 
+                ? 'В выбранной категории пока нет товаров'
+                : 'В магазине пока нет товаров'
             }
           </p>
+          {searchQuery && (
+            <button 
+              className="btn btn-primary"
+              onClick={handleClearSearch}
+            >
+              Очистить поиск
+            </button>
+          )}
         </div>
       ) : (
         <>

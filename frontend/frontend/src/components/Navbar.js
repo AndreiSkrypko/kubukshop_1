@@ -8,6 +8,9 @@ export default function Navbar({ user, setUser, openCart }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +20,46 @@ export default function Navbar({ user, setUser, openCart }) {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Поиск в реальном времени
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
+        try {
+          const response = await fetch(`http://localhost:8000/api/products/search/?q=${encodeURIComponent(searchQuery.trim())}`);
+          if (response.ok) {
+            const data = await response.json();
+            setSearchResults(data.results || data);
+            setShowSearchResults(true);
+          }
+        } catch (error) {
+          console.error('Ошибка поиска:', error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+        setShowSearchResults(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchProducts, 300); // Задержка 300мс
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Скрываем результаты при клике вне поиска
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.navbar-search')) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const handleLogout = () => {
@@ -29,9 +72,17 @@ export default function Navbar({ user, setUser, openCart }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Здесь можно добавить логику поиска
-      console.log("Searching for:", searchQuery);
+      // Перенаправляем на страницу товаров с параметром поиска
+      navigate(`/lego-shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(""); // Очищаем поле поиска
+      setShowSearchResults(false); // Скрываем результаты поиска
     }
+  };
+
+  const handleProductSelect = (product) => {
+    navigate(`/lego-shop?search=${encodeURIComponent(product.name)}`);
+    setSearchQuery("");
+    setShowSearchResults(false);
   };
 
   const toggleMenu = () => {
@@ -72,16 +123,71 @@ export default function Navbar({ user, setUser, openCart }) {
               <FaSearch className="search-icon" />
               <input
                 type="text"
-                placeholder="Поиск товаров..."
+                placeholder="Поиск товаров по названию..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSearch(e);
+                  }
+                }}
                 className="search-input"
+                aria-label="Поиск товаров"
               />
             </div>
             <button type="submit" className="search-button">
               Найти
             </button>
           </form>
+          
+          {/* Результаты поиска в реальном времени */}
+          {showSearchResults && searchResults.length > 0 && (
+            <div className="search-results-dropdown">
+              <div className="search-results-header">
+                <span>Найдено товаров: {searchResults.length}</span>
+              </div>
+              <div className="search-results-list">
+                {searchResults.slice(0, 5).map((product) => (
+                  <div
+                    key={product.id}
+                    className="search-result-item"
+                    onClick={() => handleProductSelect(product)}
+                  >
+                    <div className="search-result-image">
+                      {product.image ? (
+                        <img src={product.image} alt={product.name} />
+                      ) : (
+                        <div className="search-result-placeholder">🖼️</div>
+                      )}
+                    </div>
+                    <div className="search-result-info">
+                      <div className="search-result-name">{product.name}</div>
+                      <div className="search-result-price">{product.price} ₽</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {searchResults.length > 5 && (
+                <div className="search-results-footer">
+                  <button 
+                    className="search-results-more"
+                    onClick={handleSearch}
+                  >
+                    Показать все результаты ({searchResults.length})
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Индикатор загрузки */}
+          {isSearching && (
+            <div className="search-loading">
+              <div className="search-spinner"></div>
+              <span>Поиск...</span>
+            </div>
+          )}
         </div>
 
         {/* Навигационные ссылки */}

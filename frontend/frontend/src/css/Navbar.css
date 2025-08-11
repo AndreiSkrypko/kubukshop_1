@@ -82,6 +82,7 @@
   flex: 1;
   max-width: 500px;
   margin: 0 40px;
+  position: relative;
 }
 
 .search-form {
@@ -697,4 +698,177 @@
 /* Плавные переходы для всех элементов */
 * {
   transition: all 0.3s ease;
+}
+
+/* Стили для результатов поиска */
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin-top: 10px;
+  z-index: 1001;
+  max-height: 400px;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+}
+
+.search-results-header {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.search-results-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.search-result-item:hover {
+  background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.search-result-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.search-result-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #adb5bd;
+}
+
+.search-result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-result-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-result-price {
+  color: #28a745;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.search-results-footer {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.search-results-more {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.search-results-more:hover {
+  background-color: #e3f2fd;
+  color: #0056b3;
+}
+
+/* Индикатор загрузки поиска */
+.search-loading {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin-top: 10px;
+  padding: 20px;
+  text-align: center;
+  z-index: 1001;
+  border: 1px solid #e9ecef;
+}
+
+.search-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.search-loading span {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Адаптивность для результатов поиска */
+@media (max-width: 768px) {
+  .search-results-dropdown {
+    position: fixed;
+    top: 70px;
+    left: 20px;
+    right: 20px;
+    max-height: 60vh;
+  }
+  
+  .search-loading {
+    position: fixed;
+    top: 70px;
+    left: 20px;
+    right: 20px;
+  }
 }

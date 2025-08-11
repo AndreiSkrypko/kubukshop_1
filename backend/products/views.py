@@ -76,8 +76,57 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     def search(self, request):
         """Поиск товаров по названию с пагинацией"""
         query = request.query_params.get('q', '')
+        print(f"Поисковый запрос: '{query}'")  # Отладочная информация
+        
         if query:
-            products = self.get_queryset().filter(name__icontains=query)
+            # Получаем базовый queryset без фильтра is_available для диагностики
+            base_queryset = Product.objects.all()  # Временно убираем фильтр
+            print(f"Базовый queryset содержит {base_queryset.count()} товаров")  # Отладочная информация
+            
+            # Нормализуем запрос: приводим к нижнему регистру и убираем лишние пробелы
+            normalized_query = query.strip().lower()
+            print(f"Нормализованный запрос: '{normalized_query}'")
+            
+            # Используем Q объекты для более гибкого поиска
+            from django.db.models import Q
+            import re
+            
+            # Создаем комплексный поиск
+            q_objects = Q()
+            
+            # 1. Поиск по оригинальному запросу (как есть)
+            q_objects |= Q(name__icontains=query)
+            
+            # 2. Поиск по нормализованному запросу (нижний регистр)
+            q_objects |= Q(name__icontains=normalized_query)
+            
+            # 3. Поиск по началу названия
+            q_objects |= Q(name__istartswith=normalized_query)
+            
+            # 4. Поиск по словам
+            words = normalized_query.split()
+            for word in words:
+                if len(word) >= 2:
+                    q_objects |= Q(name__icontains=word)
+            
+            # 5. Поиск с помощью regex (обход проблем с регистром)
+            try:
+                # Создаем regex паттерн для поиска без учета регистра
+                regex_pattern = f".*{re.escape(normalized_query)}.*"
+                q_objects |= Q(name__iregex=regex_pattern)
+                print(f"Добавлен regex поиск: {regex_pattern}")
+            except Exception as e:
+                print(f"Ошибка regex поиска: {e}")
+            
+            # Применяем поиск
+            products = base_queryset.filter(q_objects).distinct()
+            print(f"Комплексный поиск: найдено {products.count()} товаров")
+            
+            # Выводим названия найденных товаров для отладки
+            print(f"Итоговый результат: {products.count()} товаров")
+            for product in products[:5]:  # Первые 5 для отладки
+                print(f"Найден товар: {product.name} (is_available: {product.is_available})")
+            
             paginator = ProductPagination()
             paginated_products = paginator.paginate_queryset(products, request)
             serializer = self.get_serializer(paginated_products, many=True)
