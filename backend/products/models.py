@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+from users.models import CustomUser
 
 
 class Category(models.Model):
@@ -48,7 +49,7 @@ class Product(models.Model):
 
 class Cart(models.Model):
     """Модель корзины покупок"""
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='carts', verbose_name="Пользователь")
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='carts', verbose_name="Пользователь")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
@@ -91,3 +92,17 @@ class CartItem(models.Model):
     def total_price(self):
         """Общая стоимость элемента корзины"""
         return self.product.price * self.quantity
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='favorites')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Избранное"
+        verbose_name_plural = "Избранное"
+        unique_together = ['user', 'product']  # Пользователь может добавить товар в избранное только один раз
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"

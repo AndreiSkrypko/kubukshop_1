@@ -1,130 +1,92 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
-from django.db import transaction
-from .models import Category, Product, Cart, CartItem
+from rest_framework.views import APIView
+from django.db.models import Q
+from .models import Category, Product, Cart, CartItem, Favorite
 from .serializers import (
-    CategorySerializer, CategoryDetailSerializer,
-    ProductSerializer, ProductDetailSerializer, ProductListSerializer,
-    CartSerializer, CartItemSerializer, AddToCartSerializer, UpdateCartItemSerializer
+    CategorySerializer, ProductSerializer, CartSerializer, 
+    CartItemSerializer, AddToCartSerializer, UpdateCartItemSerializer,
+    FavoriteSerializer
 )
-
-
-class ProductPagination(PageNumberPagination):
-    """Пагинация для товаров"""
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 100
-
+from .pagination import ProductPagination
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet для категорий товаров"""
-    queryset = Category.objects.filter(is_active=True)
+    queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return CategoryDetailSerializer
-        return CategorySerializer
     
     @action(detail=True, methods=['get'])
     def products(self, request, pk=None):
-        """Получить товары конкретной категории с пагинацией"""
-        category = self.get_object()
-        products = category.products.filter(is_available=True)
-        
-        # Применяем пагинацию для товаров категории
-        paginator = ProductPagination()
-        paginated_products = paginator.paginate_queryset(products, request)
-        serializer = ProductListSerializer(paginated_products, many=True)
-        return paginator.get_paginated_response(serializer.data)
-
+        """Получить товары конкретной категории"""
+        try:
+            category = self.get_object()
+            products = Product.objects.filter(category=category, is_available=True)
+            
+            paginator = ProductPagination()
+            paginated_products = paginator.paginate_queryset(products, request)
+            serializer = ProductSerializer(paginated_products, many=True, context={'request': request})
+            
+            return paginator.get_paginated_response(serializer.data)
+        except Category.DoesNotExist:
+            return Response({'error': 'Категория не найдена'}, status=status.HTTP_404_NOT_FOUND)
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet для товаров"""
     queryset = Product.objects.filter(is_available=True)
-    serializer_class = ProductListSerializer
+    serializer_class = ProductSerializer
     pagination_class = ProductPagination
     
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return ProductDetailSerializer
-        return ProductListSerializer
-    
-    def get_queryset(self):
-        queryset = Product.objects.filter(is_available=True)
-        category = self.request.query_params.get('category', None)
-        if category is not None:
-            try:
-                category_id = int(category)
-                queryset = queryset.filter(category_id=category_id)
-            except ValueError:
-                pass
-        return queryset.select_related('category')
-    
-    @action(detail=False, methods=['get'])
-    def featured(self, request):
-        """Получить избранные товары"""
-        products = self.get_queryset()[:10]  # Первые 10 товаров
-        serializer = self.get_serializer(products, many=True)
-        return Response(serializer.data)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
     
     @action(detail=False, methods=['get'])
     def search(self, request):
         """Поиск товаров по названию с пагинацией"""
         query = request.query_params.get('q', '')
-        print(f"Поисковый запрос: '{query}'")  # Отладочная информация
+        print(f"Поисковый запрос: '{query}'")
         
         if query:
-            # Получаем базовый queryset без фильтра is_available для диагностики
-            base_queryset = Product.objects.all()  # Временно убираем фильтр
-            print(f"Базовый queryset содержит {base_queryset.count()} товаров")  # Отладочная информация
+            # Используем базовый queryset с фильтром доступности
+            base_queryset = Product.objects.filter(is_available=True)
+            print(f"Базовый queryset содержит {base_queryset.count()} доступных товаров")
             
-            # Нормализуем запрос: приводим к нижнему регистру и убираем лишние пробелы
-            normalized_query = query.strip().lower()
-            print(f"Нормализованный запрос: '{normalized_query}'")
-            
-            # Используем Q объекты для более гибкого поиска
             from django.db.models import Q
-            import re
             
-            # Создаем комплексный поиск
             q_objects = Q()
             
             # 1. Поиск по оригинальному запросу (как есть)
             q_objects |= Q(name__icontains=query)
             
-            # 2. Поиск по нормализованному запросу (нижний регистр)
-            q_objects |= Q(name__icontains=normalized_query)
+            # 2. Поиск по запросу в верхнем регистре
+            q_objects |= Q(name__icontains=query.upper())
             
-            # 3. Поиск по началу названия
-            q_objects |= Q(name__istartswith=normalized_query)
+            # 3. Поиск по запросу в нижнем регистре
+            q_objects |= Q(name__icontains=query.lower())
             
-            # 4. Поиск по словам
-            words = normalized_query.split()
+            # 4. Поиск по запросу с заглавной первой буквой
+            if query:
+                capitalized_query = query[0].upper() + query[1:].lower()
+                q_objects |= Q(name__icontains=capitalized_query)
+            
+            # 5. Поиск по началу названия (независимо от регистра)
+            q_objects |= Q(name__istartswith=query)
+            q_objects |= Q(name__istartswith=query.lower())
+            q_objects |= Q(name__istartswith=query.upper())
+            
+            # 6. Поиск по словам (независимо от регистра)
+            words = query.split()
             for word in words:
                 if len(word) >= 2:
                     q_objects |= Q(name__icontains=word)
+                    q_objects |= Q(name__icontains=word.lower())
+                    q_objects |= Q(name__icontains=word.upper())
             
-            # 5. Поиск с помощью regex (обход проблем с регистром)
-            try:
-                # Создаем regex паттерн для поиска без учета регистра
-                regex_pattern = f".*{re.escape(normalized_query)}.*"
-                q_objects |= Q(name__iregex=regex_pattern)
-                print(f"Добавлен regex поиск: {regex_pattern}")
-            except Exception as e:
-                print(f"Ошибка regex поиска: {e}")
-            
-            # Применяем поиск
             products = base_queryset.filter(q_objects).distinct()
             print(f"Комплексный поиск: найдено {products.count()} товаров")
             
-            # Выводим названия найденных товаров для отладки
-            print(f"Итоговый результат: {products.count()} товаров")
-            for product in products[:5]:  # Первые 5 для отладки
+            for product in products[:5]:
                 print(f"Найден товар: {product.name} (is_available: {product.is_available})")
             
             paginator = ProductPagination()
@@ -133,54 +95,43 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             return paginator.get_paginated_response(serializer.data)
         return Response([])
 
-
-class CartViewSet(viewsets.ModelViewSet):
-    """ViewSet для корзины покупок"""
-    serializer_class = CartSerializer
+class CartViewSet(APIView):
     permission_classes = [IsAuthenticated]
     
-    def get_queryset(self):
-        return Cart.objects.filter(user=self.request.user)
-    
-    def get_object(self):
-        """Получает или создает корзину для пользователя"""
-        cart, created = Cart.objects.get_or_create(user=self.request.user)
-        return cart
-    
-    @action(detail=False, methods=['get'])
-    def my_cart(self, request):
+    def get(self, request):
         """Получить корзину текущего пользователя"""
-        cart = self.get_object()
-        serializer = self.get_serializer(cart)
-        return Response(serializer.data)
+        try:
+            cart, created = Cart.objects.get_or_create(user=request.user)
+            serializer = CartSerializer(cart)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error in my_cart: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CartAddItemView(APIView):
+    permission_classes = [IsAuthenticated]
     
-    @action(detail=False, methods=['post'])
-    def add_item(self, request):
+    def post(self, request):
         """Добавить товар в корзину"""
-        serializer = AddToCartSerializer(data=request.data)
-        if serializer.is_valid():
-            product_id = serializer.validated_data['product_id']
-            quantity = serializer.validated_data['quantity']
-            
-            try:
-                product = Product.objects.get(id=product_id, is_available=True)
-            except Product.DoesNotExist:
-                return Response(
-                    {'error': 'Товар не найден или недоступен'}, 
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            
-            if product.stock < quantity:
-                return Response(
-                    {'error': f'Недостаточно товара на складе. Доступно: {product.stock}'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            cart = self.get_object()
-            
-            with transaction.atomic():
+        try:
+            serializer = AddToCartSerializer(data=request.data)
+            if serializer.is_valid():
+                cart, created = Cart.objects.get_or_create(user=request.user)
+                product_id = serializer.validated_data['product_id']
+                quantity = serializer.validated_data['quantity']
+                
+                try:
+                    product = Product.objects.get(id=product_id, is_available=True)
+                except Product.DoesNotExist:
+                    return Response({'error': 'Товар не найден или недоступен'}, status=status.HTTP_404_NOT_FOUND)
+                
+                if product.stock < quantity:
+                    return Response({'error': 'Недостаточно товара на складе'}, status=status.HTTP_400_BAD_REQUEST)
+                
                 cart_item, created = CartItem.objects.get_or_create(
-                    cart=cart,
+                    cart=cart, 
                     product=product,
                     defaults={'quantity': quantity}
                 )
@@ -188,79 +139,145 @@ class CartViewSet(viewsets.ModelViewSet):
                 if not created:
                     cart_item.quantity += quantity
                     cart_item.save()
+                
+                cart.save()
+                serializer = CartSerializer(cart)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             
-            # Возвращаем обновленную корзину
-            cart.refresh_from_db()
-            serializer = self.get_serializer(cart)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(f"Error in add_item: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CartUpdateItemView(APIView):
+    permission_classes = [IsAuthenticated]
     
-    @action(detail=False, methods=['put'])
-    def update_item(self, request):
+    def put(self, request):
         """Обновить количество товара в корзине"""
-        serializer = UpdateCartItemSerializer(data=request.data)
-        if serializer.is_valid():
+        try:
+            serializer = UpdateCartItemSerializer(data=request.data)
+            if serializer.is_valid():
+                item_id = serializer.validated_data['item_id']
+                quantity = serializer.validated_data['quantity']
+                
+                try:
+                    cart_item = CartItem.objects.get(id=item_id, cart__user=request.user)
+                except CartItem.DoesNotExist:
+                    return Response({'error': 'Элемент корзины не найден'}, status=status.HTTP_404_NOT_FOUND)
+                
+                if quantity <= 0:
+                    cart_item.delete()
+                else:
+                    if cart_item.product.stock < quantity:
+                        return Response({'error': 'Недостаточно товара на складе'}, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    cart_item.quantity = quantity
+                    cart_item.save()
+                
+                cart = cart_item.cart
+                cart.save()
+                
+                serializer = CartSerializer(cart)
+                return Response(serializer.data)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(f"Error in update_item: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CartRemoveItemView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request):
+        """Удалить товар из корзины"""
+        try:
             item_id = request.data.get('item_id')
-            quantity = serializer.validated_data['quantity']
+            if not item_id:
+                return Response({'error': 'ID элемента корзины обязателен'}, status=status.HTTP_400_BAD_REQUEST)
             
             try:
-                cart_item = CartItem.objects.get(
-                    id=item_id, 
-                    cart__user=request.user
-                )
+                cart_item = CartItem.objects.get(id=item_id, cart__user=request.user)
             except CartItem.DoesNotExist:
-                return Response(
-                    {'error': 'Элемент корзины не найден'}, 
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                return Response({'error': 'Элемент корзины не найден'}, status=status.HTTP_404_NOT_FOUND)
             
-            if cart_item.product.stock < quantity:
-                return Response(
-                    {'error': f'Недостаточно товара на складе. Доступно: {cart_item.product.stock}'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            cart = cart_item.cart
+            cart_item.delete()
+            cart.save()
             
-            cart_item.quantity = quantity
-            cart_item.save()
-            
-            # Возвращаем обновленную корзину
-            cart = self.get_object()
-            serializer = self.get_serializer(cart)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = CartSerializer(cart)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error in remove_item: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CartClearView(APIView):
+    permission_classes = [IsAuthenticated]
     
-    @action(detail=False, methods=['delete'])
-    def remove_item(self, request):
-        """Удалить товар из корзины"""
-        item_id = request.data.get('item_id')
+    def delete(self, request):
+        """Очистить корзину"""
+        try:
+            cart = Cart.objects.get(user=request.user)
+            cart.items.all().delete()
+            cart.save()
+            
+            serializer = CartSerializer(cart)
+            return Response(serializer.data)
+        except Cart.DoesNotExist:
+            return Response({'error': 'Корзина не найдена'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error in clear_cart: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CartItemViewSet(viewsets.ModelViewSet):
+    serializer_class = CartItemSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return CartItem.objects.filter(cart__user=self.request.user)
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    serializer_class = FavoriteSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def toggle(self, request):
+        """Добавить/убрать товар из избранного"""
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({'error': 'ID товара обязателен'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            cart_item = CartItem.objects.get(
-                id=item_id, 
-                cart__user=request.user
-            )
-        except CartItem.DoesNotExist:
-            return Response(
-                {'error': 'Элемент корзины не найден'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            product = Product.objects.get(id=product_id, is_available=True)
+        except Product.DoesNotExist:
+            return Response({'error': 'Товар не найден или недоступен'}, status=status.HTTP_404_NOT_FOUND)
         
-        cart_item.delete()
+        favorite, created = Favorite.objects.get_or_create(
+            user=request.user,
+            product=product
+        )
         
-        # Возвращаем обновленную корзину
-        cart = self.get_object()
-        serializer = self.get_serializer(cart)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if not created:
+            # Если товар уже в избранном, убираем его
+            favorite.delete()
+            return Response({'message': 'Товар убран из избранного', 'is_favorited': False})
+        
+        return Response({'message': 'Товар добавлен в избранное', 'is_favorited': True})
     
-    @action(detail=False, methods=['delete'])
-    def clear_cart(self, request):
-        """Очистить корзину"""
-        cart = self.get_object()
-        cart.items.all().delete()
-        
-        serializer = self.get_serializer(cart)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    @action(detail=False, methods=['get'])
+    def count(self, request):
+        """Получить количество избранных товаров"""
+        count = Favorite.objects.filter(user=request.user).count()
+        return Response({'count': count})
 
 

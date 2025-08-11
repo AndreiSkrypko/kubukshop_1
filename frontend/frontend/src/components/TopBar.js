@@ -10,7 +10,7 @@ export default function TopBar({ user, openCart }) {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const response = await fetch('http://localhost:8000/api/cart/my_cart/', {
+          const response = await fetch('http://localhost:8000/api/cart/', {
             headers: {
               'Authorization': `Token ${token}`,
             },

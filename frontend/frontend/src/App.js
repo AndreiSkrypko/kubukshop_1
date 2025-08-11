@@ -9,6 +9,7 @@ import About from "./components/About";
 import LegoProducts from './components/LegoProducts';
 import Sidebar from './components/Sidebar';
 import Cart from './components/Cart';
+import Favorites from './components/Favorites';
 import './css/LegoShop.css';
 
 // Главная страница
@@ -78,7 +79,7 @@ function HomePage({ user }) {
 }
 
 // Страница товаров LEGO
-function LegoShopPage({ user, openCart }) {
+function LegoShopPage({ user, openCart, setFavoritesCount }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleCategorySelect = (categoryId) => {
@@ -93,7 +94,7 @@ function LegoShopPage({ user, openCart }) {
           selectedCategory={selectedCategory}
         />
         <div className="lego-shop-content">
-          <LegoProducts selectedCategory={selectedCategory} openCart={openCart} />
+          <LegoProducts selectedCategory={selectedCategory} openCart={openCart} setFavoritesCount={setFavoritesCount} />
         </div>
       </div>
     </div>
@@ -103,6 +104,7 @@ function LegoShopPage({ user, openCart }) {
 function App() {
   const [user, setUser] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [favoritesCount, setFavoritesCount] = useState(0);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -119,24 +121,68 @@ function App() {
     }
   }, []);
 
-  const openCart = () => setIsCartOpen(true);
-  const closeCart = () => setIsCartOpen(false);
+  // Загружаем количество избранных товаров при входе пользователя
+  useEffect(() => {
+    const loadFavoritesCount = async () => {
+      if (user) {
+        try {
+          const token = localStorage.getItem('token');
+          if (token) {
+            const response = await fetch('http://localhost:8000/api/favorites/count/', {
+              headers: {
+                'Authorization': `Token ${token}`,
+              },
+            });
+            if (response.ok) {
+              const data = await response.json();
+              setFavoritesCount(data.count);
+            }
+          }
+        } catch (error) {
+          console.error('Ошибка загрузки количества избранных товаров:', error);
+        }
+      } else {
+        setFavoritesCount(0);
+      }
+    };
+
+    loadFavoritesCount();
+  }, [user]);
+
+  const openCart = () => {
+    console.log('openCart called, setting isCartOpen to true');
+    console.log('Current isCartOpen state:', isCartOpen);
+    setIsCartOpen(true);
+    console.log('After setting isCartOpen to true');
+  };
+  
+  const closeCart = () => {
+    console.log('closeCart called, setting isCartOpen to false');
+    console.log('Current isCartOpen state:', isCartOpen);
+    setIsCartOpen(false);
+    console.log('After setting isCartOpen to false');
+  };
 
   return (
     <Router>
       <TopBar user={user} openCart={openCart} />
-      <Navbar user={user} setUser={setUser} openCart={openCart} />
+      <Navbar user={user} setUser={setUser} openCart={openCart} favoritesCount={favoritesCount} />
       <Routes>
         <Route path="/" element={<HomePage user={user} />} />
-        <Route path="/lego-shop" element={<LegoShopPage user={user} openCart={openCart} />} />
+        <Route path="/lego-shop" element={<LegoShopPage user={user} openCart={openCart} setFavoritesCount={setFavoritesCount} />} />
         <Route path="/register" element={<RegisterForm setUser={setUser} />} />
         <Route path="/login" element={<LoginForm setUser={setUser} />} />
         <Route path="/about" element={<About />} />
+        <Route path="/favorites" element={<Favorites setFavoritesCount={setFavoritesCount} />} />
       </Routes>
       
       {/* Cart Modal */}
+      {console.log('Rendering check - isCartOpen:', isCartOpen, 'user:', user, 'condition result:', isCartOpen && user)}
       {isCartOpen && user && (
-        <Cart user={user} onClose={closeCart} />
+        <div>
+          {console.log('Rendering Cart component, isCartOpen:', isCartOpen, 'user:', user)}
+          <Cart user={user} onClose={closeCart} />
+        </div>
       )}
       
       <Footer />

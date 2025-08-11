@@ -3,7 +3,7 @@ import { FaHeart, FaSearch, FaUser, FaBars, FaTimes } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import "../css/Navbar.css";
 
-export default function Navbar({ user, setUser, openCart }) {
+export default function Navbar({ user, setUser, openCart, favoritesCount }) {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -226,9 +226,12 @@ export default function Navbar({ user, setUser, openCart }) {
           {/* Избранное */}
           {user && (
             <div className="action-item">
-              <button className="action-button favorite-btn">
+              <button className="action-button favorite-btn" onClick={() => navigate('/favorites')}>
                 <FaHeart className="action-icon" />
                 <span className="action-text">Избранное</span>
+                {favoritesCount > 0 && (
+                  <span className="favorites-count">{favoritesCount}</span>
+                )}
               </button>
             </div>
           )}

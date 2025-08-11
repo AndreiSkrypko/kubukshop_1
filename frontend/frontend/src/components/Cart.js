@@ -10,6 +10,7 @@ export default function Cart({ user, onClose }) {
   const API_BASE_URL = 'http://localhost:8000/api';
 
   useEffect(() => {
+    console.log('Cart component mounted, user:', user);
     if (user) {
       fetchCart();
     }
@@ -17,24 +18,30 @@ export default function Cart({ user, onClose }) {
 
   const fetchCart = async () => {
     try {
+      console.log('Fetching cart for user:', user);
       setLoading(true);
       setError(null);
-
-      const response = await fetch(`${API_BASE_URL}/cart/my_cart/`, {
+      
+      const token = localStorage.getItem('token');
+      console.log('Token:', token ? 'exists' : 'missing');
+      
+      const response = await fetch('http://localhost:8000/api/cart/', {
         headers: {
-          'Authorization': `Token ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`,
         },
       });
-
+      
+      console.log('Cart API response status:', response.status);
+      
       if (!response.ok) {
         throw new Error('Ошибка загрузки корзины');
       }
-
+      
       const data = await response.json();
+      console.log('Cart data received:', data);
       setCart(data);
-    } catch (err) {
-      console.error('Ошибка загрузки корзины:', err);
+    } catch (error) {
+      console.error('Ошибка загрузки корзины:', error);
       setError('Не удалось загрузить корзину');
     } finally {
       setLoading(false);
@@ -46,17 +53,17 @@ export default function Cart({ user, onClose }) {
 
     try {
       setUpdating(true);
-              const response = await fetch(`${API_BASE_URL}/cart/update_item/`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Token ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            item_id: itemId,
-            quantity: newQuantity,
-          }),
-        });
+      const response = await fetch('http://localhost:8000/api/cart/update_item/', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Token ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          item_id: itemId,
+          quantity: newQuantity,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error('Ошибка обновления количества');
@@ -73,22 +80,16 @@ export default function Cart({ user, onClose }) {
   };
 
   const removeItem = async (itemId) => {
-    if (!window.confirm('Вы уверены, что хотите удалить этот товар из корзины?')) {
-      return;
-    }
-
     try {
-      setUpdating(true);
-              const response = await fetch(`${API_BASE_URL}/cart/remove_item/`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Token ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            item_id: itemId,
-          }),
-        });
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/cart/remove_item/', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ item_id: itemId }),
+      });
 
       if (!response.ok) {
         throw new Error('Ошибка удаления товара');
@@ -96,11 +97,9 @@ export default function Cart({ user, onClose }) {
 
       const updatedCart = await response.json();
       setCart(updatedCart);
-    } catch (err) {
-      console.error('Ошибка удаления товара:', err);
-      alert('Не удалось удалить товар из корзины');
-    } finally {
-      setUpdating(false);
+    } catch (error) {
+      console.error('Ошибка удаления товара:', error);
+      setError('Не удалось удалить товар');
     }
   };
 
@@ -111,7 +110,7 @@ export default function Cart({ user, onClose }) {
 
     try {
       setUpdating(true);
-      const response = await fetch(`${API_BASE_URL}/cart/clear_cart/`, {
+      const response = await fetch('http://localhost:8000/api/cart/clear_cart/', {
         method: 'DELETE',
         headers: {
           'Authorization': `Token ${localStorage.getItem('token')}`,
@@ -139,6 +138,7 @@ export default function Cart({ user, onClose }) {
   };
 
   if (loading) {
+    console.log('Cart: Rendering loading state');
     return (
       <div className="cart-overlay">
         <div className="cart-modal">
@@ -154,6 +154,7 @@ export default function Cart({ user, onClose }) {
   }
 
   if (error) {
+    console.log('Cart: Rendering error state:', error);
     return (
       <div className="cart-overlay">
         <div className="cart-modal">
@@ -170,6 +171,7 @@ export default function Cart({ user, onClose }) {
     );
   }
 
+  console.log('Cart: Rendering main cart content, cart data:', cart);
   return (
     <div className="cart-overlay" onClick={onClose}>
       <div className="cart-modal" onClick={(e) => e.stopPropagation()}>

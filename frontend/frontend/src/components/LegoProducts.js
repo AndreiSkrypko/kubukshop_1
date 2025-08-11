@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import '../css/LegoProducts.css';
 
-export default function LegoProducts({ selectedCategory, openCart, onResetCategory }) {
+export default function LegoProducts({ selectedCategory, openCart, onResetCategory, setFavoritesCount }) {
   const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,8 +15,32 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
   const [notification, setNotification] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [favorites, setFavorites] = useState(new Set());
 
   const API_BASE_URL = 'http://localhost:8000/api';
+
+  // Загрузка состояния избранного
+  const loadFavoritesState = async (productsList) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/favorites/`, {
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const favoritesData = await response.json();
+        // FIX: Map to product.id, not product object
+        const favoriteIds = new Set(favoritesData.map(fav => fav.product.id));
+        setFavorites(favoriteIds);
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки избранного:', err);
+    }
+  };
 
   // Извлекаем параметры из URL
   useEffect(() => {
@@ -83,6 +108,10 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
           setTotalCount(data.count || data.length);
           setTotalPages(Math.ceil((data.count || data.length) / 10));
         }
+        
+        // Загружаем состояние избранного для загруженных товаров
+        await loadFavoritesState(data.results || data);
+        
       } catch (err) {
         console.error('Ошибка загрузки товаров:', err);
         setError('Не удалось загрузить товары. Проверьте, запущен ли Django сервер.');
@@ -104,8 +133,10 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
 
   const handleAddToCart = async (product) => {
     try {
+      console.log('Adding product to cart:', product);
       const token = localStorage.getItem('token');
       if (!token) {
+        console.log('No token found, user not authenticated');
         setNotification({
           type: 'danger',
           message: 'Для добавления товара в корзину необходимо войти в систему'
@@ -116,7 +147,7 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
 
       console.log('Adding product to cart:', product.id, 'with token:', token);
 
-      const response = await fetch(`${API_BASE_URL}/cart/add_item/`, {
+      const response = await fetch('http://localhost:8000/api/cart/add_item/', {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
@@ -150,13 +181,84 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
       
       // Открываем корзину после успешного добавления
       if (openCart) {
+        console.log('Calling openCart function');
         openCart();
+      } else {
+        console.log('openCart function is not available');
       }
     } catch (err) {
       console.error('Ошибка добавления в корзину:', err);
       setNotification({
         type: 'danger',
         message: `Не удалось добавить товар в корзину: ${err.message}`
+      });
+      setTimeout(() => setNotification(null), 5000);
+    }
+  };
+
+  const handleToggleFavorite = async (product) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setNotification({
+          type: 'danger',
+          message: 'Для добавления в избранное необходимо войти в систему'
+        });
+        setTimeout(() => setNotification(null), 3000);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/favorites/toggle/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product_id: product.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка обновления избранного');
+      }
+
+      const result = await response.json();
+      
+      // Обновляем локальное состояние
+      if (result.is_favorited) {
+        setFavorites(prev => new Set(prev).add(product.id));
+        setNotification({
+          type: 'success',
+          message: `Товар "${product.name}" добавлен в избранное!`
+        });
+        // Обновляем счетчик избранного
+        if (setFavoritesCount) {
+          setFavoritesCount(prev => prev + 1);
+        }
+      } else {
+        setFavorites(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(product.id);
+          return newSet;
+        });
+        setNotification({
+          type: 'success',
+          message: `Товар "${product.name}" убран из избранного!`
+        });
+        // Обновляем счетчик избранного
+        if (setFavoritesCount) {
+          setFavoritesCount(prev => Math.max(0, prev - 1));
+        }
+      }
+      
+      setTimeout(() => setNotification(null), 3000);
+      
+    } catch (err) {
+      console.error('Ошибка обновления избранного:', err);
+      setNotification({
+        type: 'danger',
+        message: `Не удалось обновить избранное: ${err.message}`
       });
       setTimeout(() => setNotification(null), 5000);
     }
@@ -425,6 +527,14 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
                       <span>🖼️</span>
                     </div>
                   )}
+                  {/* Кнопка избранного */}
+                  <button
+                    className={`favorite-btn ${favorites.has(product.id) ? 'active' : ''}`}
+                    onClick={() => handleToggleFavorite(product)}
+                    title={favorites.has(product.id) ? 'Убрать из избранного' : 'Добавить в избранное'}
+                  >
+                    {favorites.has(product.id) ? <FaHeart /> : <FaRegHeart />}
+                  </button>
                 </div>
                 <div className="product-info">
                   <h3 className="product-name">{product.name}</h3>
