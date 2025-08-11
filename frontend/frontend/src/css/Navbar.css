@@ -144,22 +144,12 @@
 
 /* Кнопка поиска убрана - поиск работает по Enter */
 
-/* Навигационное меню */
-.navbar-menu {
+/* Навигационные ссылки на одной линии */
+.navbar-nav-inline {
   display: flex;
   align-items: center;
-}
-
-.navbar-nav {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  gap: 5px;
-}
-
-.nav-item {
-  position: relative;
+  gap: 15px;
+  margin: 0 20px;
 }
 
 .nav-link {
@@ -190,33 +180,17 @@
   box-shadow: none;
   border: 1px solid rgba(255, 255, 255, 0.25);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
-.nav-link.lego-shop-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.6s ease;
-}
+/* Убираем эффект ::before для кнопки "Магазин LEGO" */
 
-.nav-link.lego-shop-btn:hover::before {
-  left: 100%;
-}
+/* Убираем дублирующийся hover стиль */
 
-.nav-link.lego-shop-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.nav-link.lego-shop-btn:active {
-  transform: translateY(-1px) scale(1.02);
+/* Единые active стили для всех навигационных кнопок */
+.nav-link.lego-shop-btn:active,
+.nav-link.about-btn:active {
+  background: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Специальная стилизация для кнопки "О нас" */
@@ -229,55 +203,19 @@
   box-shadow: none;
   border: 1px solid rgba(255, 255, 255, 0.25);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
-.nav-link.about-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.6s ease;
-}
+/* Убираем эффект ::before для всех навигационных ссылок */
 
-.nav-link.about-btn:hover::before {
-  left: 100%;
-}
+/* Убираем общий hover стиль для предотвращения конфликтов */
 
+/* Единые hover стили для всех навигационных кнопок */
+.nav-link.lego-shop-btn:hover,
 .nav-link.about-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.nav-link.about-btn:active {
-  transform: translateY(-1px) scale(1.02);
-}
-
-.nav-link::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.nav-link:hover::before {
-  left: 100%;
-}
-
-.nav-link:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* Действия пользователя */
@@ -312,26 +250,11 @@
 
 .action-button:hover {
   background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* Добавляем красивый эффект для кнопки "Избранное" */
-.action-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-}
-
-.action-button:hover::before {
-  left: 100%;
-}
+/* Убираем эффект ::before для предотвращения "шлейфа" */
 
 .action-icon {
   font-size: 1rem;
@@ -339,7 +262,7 @@
 }
 
 .action-button:hover .action-icon {
-  transform: scale(1.1);
+  /* Убираем transform для предотвращения дрожания */
 }
 
 .action-text {
@@ -357,7 +280,6 @@
 .user-dropdown:hover .dropdown-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
 }
 
 .dropdown-menu {
@@ -371,8 +293,7 @@
   min-width: 220px;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-15px) scale(0.9);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.3s ease, visibility 0.3s ease;
   backdrop-filter: blur(20px);
   margin-top: 15px;
   z-index: 1000;
@@ -382,7 +303,6 @@
 .dropdown-menu.show {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0) scale(1);
 }
 
 .dropdown-item {
@@ -407,7 +327,6 @@
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   padding-left: 28px;
-  transform: translateX(5px);
 }
 
 /* Специальные стили для кнопки "Выйти" */
@@ -458,7 +377,6 @@
 .login-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
 }
 
 .register-btn {
@@ -468,30 +386,10 @@
 }
 
 .register-btn:hover {
-  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
 }
 
-/* Мобильное меню */
-.navbar-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.navbar-toggle:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.navbar-toggle.active {
-  background: rgba(255, 255, 255, 0.2);
-}
+/* Мобильное меню убрано - все на одной линии */
 
 /* Адаптивный дизайн */
 @media (max-width: 1024px) {
@@ -499,12 +397,12 @@
     margin: 0 20px;
   }
   
-  .navbar-nav {
-    gap: 3px;
+  .navbar-nav-inline {
+    gap: 10px;
   }
   
   .nav-link {
-    padding: 8px 12px;
+    padding: 10px 16px;
     font-size: 0.9rem;
   }
 }
@@ -518,96 +416,24 @@
     display: none;
   }
   
-  .navbar-menu {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    flex-direction: column;
-    padding: 20px;
-    transform: translateY(-100%);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    max-height: calc(100vh - 70px);
-    overflow-y: auto;
-  }
-  
-  .navbar-menu.active {
-    transform: translateY(0);
-    opacity: 1;
-    visibility: visible;
-  }
-  
-  .navbar-nav {
-    flex-direction: row !important; /* Принудительно в строку */
-    width: 100% !important;
-    gap: 10px !important;
-    justify-content: center !important;
-    flex-wrap: wrap !important;
-    /* Отладочные стили */
-    border: 2px solid red;
-    background: rgba(255, 0, 0, 0.1);
-    /* Дополнительные стили для ul */
-    list-style: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: flex !important;
-  }
-  
-  .nav-item {
-    /* Стили для li элементов */
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
+  .navbar-nav-inline {
+    gap: 8px;
+    margin: 0 10px;
   }
   
   .nav-link {
-    width: auto;
-    text-align: center;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 1rem;
-    min-width: 120px;
-    /* Отладочные стили */
-    border: 1px solid blue;
-    background: rgba(0, 0, 255, 0.1);
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    border-radius: 20px;
   }
   
-  /* Специальная стилизация для кнопки LEGO на мобильных */
-  .nav-link.lego-shop-btn {
-    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-    color: white;
-    font-weight: 700;
-    padding: 18px 20px;
-    border-radius: 15px;
-    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    margin: 5px 0;
-  }
-  
-  .nav-link.lego-shop-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.7);
-  }
-  
-  /* Специальная стилизация для кнопки "О нас" на мобильных */
+  /* Специальная стилизация для кнопок на мобильных */
+  .nav-link.lego-shop-btn,
   .nav-link.about-btn {
-    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    background: rgba(255, 255, 255, 0.15);
     color: white;
-    font-weight: 700;
-    padding: 18px 20px;
-    border-radius: 15px;
-    box-shadow: 0 6px 20px rgba(78, 205, 196, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    margin: 5px 0;
-  }
-  
-  .nav-link.about-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(78, 205, 196, 0.7);
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.25);
   }
   
   .navbar-actions {
@@ -623,9 +449,7 @@
     gap: 8px;
   }
   
-  .navbar-toggle {
-    display: block;
-  }
+  /* Мобильное меню убрано */
   
   .brand-text {
     display: none;
@@ -682,25 +506,44 @@
     font-size: 0.9rem;
   }
   
-  .navbar-menu {
-    padding: 15px;
-  }
-  
-  .navbar-nav {
+  .navbar-nav-inline {
     gap: 8px;
-    flex-direction: row !important; /* Принудительно в строку */
-    /* Отладочные стили */
-    border: 2px solid green;
-    background: rgba(0, 255, 0, 0.1);
+    margin: 0 10px;
   }
   
   .nav-link {
     min-width: 100px;
     padding: 12px 16px;
     font-size: 0.9rem;
-    /* Отладочные стили */
-    border: 1px solid orange;
-    background: rgba(255, 165, 0, 0.1);
+  }
+  
+  /* Счетчик избранного для мобильной версии */
+  .favorite-nav-btn .favorites-count {
+    top: -3px !important;
+    right: -3px !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    max-width: 16px !important;
+    font-size: 9px !important;
+    border: 1.5px solid white !important;
+    z-index: 100 !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+  }
+  
+  /* Счетчик избранного для очень маленьких экранов */
+  .favorites-count {
+    top: -4px !important;
+    right: -4px !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    font-size: 10px !important;
+    z-index: 100 !important;
+    line-height: 1 !important;
+    padding: 0 !important;
   }
 }
 
@@ -731,24 +574,7 @@
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
-/* Стили для скроллбара в мобильном меню */
-.navbar-menu::-webkit-scrollbar {
-  width: 6px;
-}
-
-.navbar-menu::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.navbar-menu::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-}
-
-.navbar-menu::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
+/* Стили для скроллбара убраны - мобильное меню больше не используется */
 
 /* Плавные переходы для всех элементов */
 * {
@@ -931,36 +757,40 @@
 /* Счетчик избранных товаров */
 .favorites-count {
   position: absolute;
-  top: -10px;
-  right: -10px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  top: -5px;
+  right: -5px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
   color: white;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
-  min-width: 24px;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+  min-width: 20px;
+  max-width: 20px;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5);
   border: 2px solid white;
   animation: pulse 2s infinite;
+  z-index: 100;
+  line-height: 1;
+  padding: 0;
 }
 
 @keyframes pulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
   }
   50% {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.6);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.6);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
   }
 }
 
@@ -981,7 +811,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
   letter-spacing: 0.3px !important;
   position: relative !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   text-decoration: none !important;
   
   /* Принудительно убираем круглую форму */
@@ -989,17 +819,19 @@
   height: auto !important;
   min-width: auto !important;
   min-height: auto !important;
+  
+  /* Добавляем отступы для счетчика */
+  margin: 5px !important;
 }
 
 .favorite-nav-btn:hover {
   background: rgba(255, 255, 255, 0.25) !important;
-  transform: translateY(-3px) scale(1.02) !important;
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2) !important;
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .favorite-nav-btn:active {
-  transform: translateY(-1px) scale(1.01) !important;
+  background: rgba(255, 255, 255, 0.3) !important;
   box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2) !important;
 }
 
@@ -1014,24 +846,54 @@
   transition: transform 0.3s ease;
 }
 
+/* Новый стиль для кнопки пользователя */
+.modern-user-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.modern-user-btn:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.modern-user-btn:active {
+  background: linear-gradient(135deg, #4a5fc6, #5a3180) !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+}
+
 .favorite-nav-btn:hover .nav-icon {
-  transform: scale(1.1) !important;
+  /* Убираем transform для предотвращения "шлейфа" */
 }
 
-/* Добавляем красивый эффект ::before для кнопки избранного в навигации */
-.favorite-nav-btn::before {
-  content: '' !important;
+/* Убираем эффект ::before для предотвращения "шлейфа" */
+
+/* Специальные стили для счетчика в кнопке навигации */
+.favorite-nav-btn .favorites-count {
   position: absolute !important;
-  top: 0 !important;
-  left: -100% !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
-  transition: left 0.6s ease !important;
-}
-
-.favorite-nav-btn:hover::before {
-  left: 100% !important;
+  top: -5px !important;
+  right: -5px !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+  font-size: 10px !important;
+  z-index: 100 !important;
+  border: 1.5px solid white !important;
+  background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5) !important;
+  line-height: 1 !important;
+  padding: 0 !important;
 }
 
 .action-item .favorite-btn:hover {

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FaHeart, FaSearch, FaUser, FaBars, FaTimes } from "react-icons/fa";
+import { FaHeart, FaSearch, FaUser } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import "../css/Navbar.css";
 
 export default function Navbar({ user, setUser, openCart, favoritesCount }) {
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Состояние мобильного меню убрано - все на одной линии
   const [searchQuery, setSearchQuery] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -93,12 +93,8 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
     setShowSearchResults(false);
   };
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   const closeMenu = () => {
-    setIsMenuOpen(false);
+    // Функция для закрытия мобильного меню (оставлена для совместимости)
   };
 
   const toggleUserDropdown = () => {
@@ -208,41 +204,29 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
           )}
         </div>
 
-        {/* Навигационные ссылки */}
-        <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
-          <ul className="navbar-nav" style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            gap: '10px',
-            width: '100%'
-          }}>
-            {navLinks.map((link, index) => (
-              <li key={index} className="nav-item">
-                <Link 
-                  className={`nav-link ${link.label === "Магазин LEGO" ? 'lego-shop-btn' : ''} ${link.label === "О нас" ? 'about-btn' : ''}`} 
-                  to={link.path} 
-                  onClick={closeMenu}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-            
-            {/* Избранное - теперь на одном уровне с навигацией */}
-            {user && (
-              <li className="nav-item">
-                <button className="nav-link favorite-nav-btn" onClick={() => navigate('/favorites')}>
-                  <FaHeart className="nav-icon" />
-                  <span>Избранное</span>
-                  {favoritesCount > 0 && (
-                    <span className="favorites-count">{favoritesCount}</span>
-                  )}
-                </button>
-              </li>
-            )}
-          </ul>
+        {/* Навигационные ссылки - теперь на одной линии */}
+        <div className="navbar-nav-inline">
+          {navLinks.map((link, index) => (
+            <Link 
+              key={index}
+              className={`nav-link ${link.label === "Магазин LEGO" ? 'lego-shop-btn' : ''} ${link.label === "О нас" ? 'about-btn' : ''}`} 
+              to={link.path} 
+              onClick={closeMenu}
+            >
+              {link.label}
+            </Link>
+          ))}
+          
+          {/* Избранное - на одном уровне с навигацией */}
+          {user && (
+            <button className="nav-link favorite-nav-btn" onClick={() => navigate('/favorites')}>
+              <FaHeart className="nav-icon" />
+              <span>Избранное</span>
+              {favoritesCount > 0 && (
+                <span className="favorites-count">{favoritesCount}</span>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Правая часть навбара */}
@@ -253,7 +237,7 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
           {user ? (
             <div className="action-item user-dropdown">
               <button 
-                className="action-button user-btn" 
+                className="action-button user-btn modern-user-btn" 
                 onClick={toggleUserDropdown}
               >
                 <FaUser className="action-icon" />
@@ -279,14 +263,7 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
           )}
         </div>
 
-        {/* Мобильное меню */}
-        <button 
-          className={`navbar-toggle ${isMenuOpen ? 'active' : ''}`}
-          onClick={toggleMenu}
-          aria-label="Toggle navigation menu"
-        >
-          {isMenuOpen ? <FaTimes /> : <FaBars />}
-        </button>
+        {/* Мобильное меню убрано - все на одной линии */}
       </div>
     </nav>
   );
