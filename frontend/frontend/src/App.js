@@ -11,65 +11,157 @@ import Sidebar from './components/Sidebar';
 import Cart from './components/Cart';
 import Favorites from './components/Favorites';
 import './css/LegoShop.css';
+import './css/Home.css';
 
 // Главная страница
 function HomePage({ user }) {
   return (
-    <div className="container mt-5">
-      <div className="row">
-        <div className="col-12 text-center">
-          <h1 className="display-4 mb-4">Добро пожаловать в KubukShop</h1>
-          {user ? (
-            <div className="alert alert-success">
-              <h4>Добро пожаловать, {user.username || user.email}!</h4>
-              <p className="mb-0">Вы успешно вошли в систему. Теперь вы можете пользоваться всеми возможностями нашего магазина.</p>
-            </div>
-          ) : (
-            <>
-              <p className="lead mb-4">
-                Ваш надежный партнер в мире качественных товаров
+    <div className="home-page">
+      {/* Герой-секция */}
+      <div className="hero-section">
+        <div className="container">
+          <div className="row align-items-center">
+            <div className="col-lg-6">
+              <h1 className="hero-title">Добро пожаловать в KubukShop</h1>
+              <p className="hero-subtitle">
+                Откройте для себя мир качественных товаров и отличного сервиса. 
+                Мы предлагаем широкий ассортимент товаров для всей семьи.
               </p>
-              <div className="d-flex justify-content-center gap-3">
-                <a href="/login" className="btn btn-primary btn-lg">
-                  Войти
-                </a>
-                <a href="/register" className="btn btn-outline-primary btn-lg">
-                  Зарегистрироваться
-                </a>
+              {user ? (
+                <div className="alert alert-success">
+                  <h4>Рады видеть вас, {user.username || user.email}!</h4>
+                  <p className="mb-0">Исследуйте наш каталог и находите то, что вам нужно.</p>
+                </div>
+              ) : (
+                <div className="hero-buttons">
+                  <a href="/login" className="btn btn-primary btn-lg me-3">
+                    Войти в систему
+                  </a>
+                  <a href="/register" className="btn btn-outline-primary btn-lg">
+                    Создать аккаунт
+                  </a>
+                </div>
+              )}
+            </div>
+            <div className="col-lg-6 text-center">
+              <div className="hero-image">
+                <span className="hero-icon">🛍️</span>
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div className="row mt-5">
-        <div className="col-md-4 mb-4">
-          <div className="card h-100">
-            <div className="card-body text-center">
-              <h5 className="card-title">Качественные товары</h5>
-              <p className="card-text">
-                Мы предлагаем только лучшие товары от проверенных производителей
-              </p>
+
+      {/* Преимущества */}
+      <div className="features-section">
+        <div className="container">
+          <div className="row text-center mb-5">
+            <div className="col-12">
+              <h2 className="section-title">Почему выбирают нас</h2>
+              <p className="section-subtitle">Мы стремимся предоставить вам лучший опыт покупок</p>
+            </div>
+          </div>
+          
+          <div className="row">
+            <div className="col-md-4 mb-4">
+              <div className="feature-card">
+                <div className="feature-icon">🚚</div>
+                <h5 className="feature-title">Быстрая доставка</h5>
+                <p className="feature-text">
+                  Доставляем заказы по всей стране в кратчайшие сроки. 
+                  Бесплатная доставка при заказе от 4 000 ₽.
+                </p>
+              </div>
+            </div>
+            <div className="col-md-4 mb-4">
+              <div className="feature-card">
+                <div className="feature-icon">⭐</div>
+                <h5 className="feature-title">Качество товаров</h5>
+                <p className="feature-text">
+                  Мы тщательно отбираем поставщиков и предлагаем только 
+                  качественные товары от проверенных производителей.
+                </p>
+              </div>
+            </div>
+            <div className="col-md-4 mb-4">
+              <div className="feature-card">
+                <div className="feature-icon">💬</div>
+                <h5 className="feature-title">Поддержка 24/7</h5>
+                <p className="feature-text">
+                  Наша команда поддержки всегда готова помочь вам 
+                  с любыми вопросами и решить возникшие проблемы.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-        <div className="col-md-4 mb-4">
-          <div className="card h-100">
-            <div className="card-body text-center">
-              <h5 className="card-title">Быстрая доставка</h5>
-              <p className="card-text">
-                Доставляем заказы в кратчайшие сроки по всей стране
-              </p>
+      </div>
+
+      {/* Популярные категории */}
+      <div className="categories-section">
+        <div className="container">
+          <div className="row text-center mb-5">
+            <div className="col-12">
+              <h2 className="section-title">Популярные категории</h2>
+              <p className="section-subtitle">Исследуйте наши основные направления</p>
+            </div>
+          </div>
+          
+          <div className="row">
+            <div className="col-md-6 col-lg-3 mb-4">
+              <div className="category-card">
+                <div className="category-icon">🧱</div>
+                <h5 className="category-title">LEGO конструкторы</h5>
+                <p className="category-text">Увлекательные наборы для всех возрастов</p>
+                <a href="/lego-shop" className="btn btn-outline-primary">Перейти</a>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-3 mb-4">
+              <div className="category-card">
+                <div className="category-icon">🎮</div>
+                <h5 className="category-title">Игры и развлечения</h5>
+                <p className="category-text">Настольные игры и развивающие игрушки</p>
+                <a href="/lego-shop" className="btn btn-outline-primary">Перейти</a>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-3 mb-4">
+              <div className="category-card">
+                <div className="category-icon">📚</div>
+                <h5 className="category-title">Книги и обучение</h5>
+                <p className="category-text">Образовательная литература для детей</p>
+                <a href="/lego-shop" className="btn btn-outline-primary">Перейти</a>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-3 mb-4">
+              <div className="category-card">
+                <div className="category-icon">🎨</div>
+                <h5 className="category-title">Творчество</h5>
+                <p className="category-text">Наборы для рисования и рукоделия</p>
+                <a href="/lego-shop" className="btn btn-outline-primary">Перейти</a>
+              </div>
             </div>
           </div>
         </div>
-        <div className="col-md-4 mb-4">
-          <div className="card h-100">
-            <div className="card-body text-center">
-              <h5 className="card-title">Отличный сервис</h5>
-              <p className="card-text">
-                Наша команда всегда готова помочь вам с любыми вопросами
-              </p>
+      </div>
+
+      {/* Информация о доставке */}
+      <div className="delivery-section">
+        <div className="container">
+          <div className="row align-items-center">
+            <div className="col-lg-6">
+              <h3 className="delivery-title">Удобная доставка</h3>
+              <ul className="delivery-list">
+                <li>🚚 Быстрая доставка по всей России</li>
+                <li>📦 Безопасная упаковка товаров</li>
+                <li>💰 Бесплатная доставка от 4 000 ₽</li>
+                <li>📱 Отслеживание заказа в реальном времени</li>
+                <li>🔄 Возможность возврата в течение 14 дней</li>
+              </ul>
+            </div>
+            <div className="col-lg-6 text-center">
+              <div className="delivery-image">
+                <span className="delivery-icon">📦</span>
+              </div>
             </div>
           </div>
         </div>
