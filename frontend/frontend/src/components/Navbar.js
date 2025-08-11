@@ -152,9 +152,6 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
                 aria-label="Поиск товаров"
               />
             </div>
-            <button type="submit" className="search-button">
-              Найти
-            </button>
           </form>
           
           {/* Результаты поиска в реальном времени */}
@@ -232,24 +229,24 @@ export default function Navbar({ user, setUser, openCart, favoritesCount }) {
                 </Link>
               </li>
             ))}
+            
+            {/* Избранное - теперь на одном уровне с навигацией */}
+            {user && (
+              <li className="nav-item">
+                <button className="nav-link favorite-nav-btn" onClick={() => navigate('/favorites')}>
+                  <FaHeart className="nav-icon" />
+                  <span>Избранное</span>
+                  {favoritesCount > 0 && (
+                    <span className="favorites-count">{favoritesCount}</span>
+                  )}
+                </button>
+              </li>
+            )}
           </ul>
         </div>
 
         {/* Правая часть навбара */}
         <div className="navbar-actions">
-          {/* Избранное */}
-          {user && (
-            <div className="action-item">
-              <button className="action-button favorite-btn" onClick={() => navigate('/favorites')}>
-                <FaHeart className="action-icon" />
-                <span className="action-text">Избранное</span>
-                {favoritesCount > 0 && (
-                  <span className="favorites-count">{favoritesCount}</span>
-                )}
-              </button>
-            </div>
-          )}
-
           {/* Корзина убрана - достаточно в топ баре */}
 
           {/* Пользователь */}
