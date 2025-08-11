@@ -106,3 +106,50 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
+
+
+class Order(models.Model):
+    """Модель заказа"""
+    STATUS_CHOICES = [
+        ('оформлен', 'Оформлен'),
+        ('оплачен', 'Оплачен'),
+        ('отправлен', 'Отправлен'),
+    ]
+    
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders', verbose_name="Пользователь")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='оформлен', verbose_name="Статус заказа")
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Общая стоимость")
+    shipping_address = models.TextField(blank=True, verbose_name="Адрес доставки")
+    phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
+    notes = models.TextField(blank=True, verbose_name="Примечания к заказу")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Заказ #{self.id} - {self.user.username} ({self.get_status_display()})"
+
+
+class OrderItem(models.Model):
+    """Модель элемента заказа"""
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name="Заказ")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товар")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена за единицу")
+    
+    class Meta:
+        verbose_name = "Элемент заказа"
+        verbose_name_plural = "Элементы заказа"
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.quantity}x {self.product.name} в заказе #{self.order.id}"
+
+    @property
+    def total_price(self):
+        """Общая стоимость элемента заказа"""
+        return self.price * self.quantity

@@ -10,6 +10,8 @@ import LegoProducts from './components/LegoProducts';
 import Sidebar from './components/Sidebar';
 import Cart from './components/Cart';
 import Favorites from './components/Favorites';
+import Profile from './components/Profile';
+import Orders from './components/Orders';
 import './css/LegoShop.css';
 import './css/Home.css';
 
@@ -31,6 +33,14 @@ function HomePage({ user }) {
                 <div className="alert alert-success">
                   <h4>Рады видеть вас, {user.username || user.email}!</h4>
                   <p className="mb-0">Исследуйте наш каталог и находите то, что вам нужно.</p>
+                  <div className="mt-3">
+                    <a href="/profile" className="btn btn-outline-light me-2">
+                      Личный кабинет
+                    </a>
+                    <a href="/favorites" className="btn btn-outline-light">
+                      Избранное
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <div className="hero-buttons">
@@ -266,6 +276,8 @@ function App() {
         <Route path="/login" element={<LoginForm setUser={setUser} />} />
         <Route path="/about" element={<About />} />
         <Route path="/favorites" element={<Favorites setFavoritesCount={setFavoritesCount} />} />
+        <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
+        <Route path="/orders" element={<Orders user={user} />} />
       </Routes>
       
       {/* Cart Modal */}

@@ -132,9 +132,52 @@ export default function Cart({ user, onClose }) {
     }
   };
 
-  const handleCheckout = () => {
-    // Здесь будет логика оформления заказа
-    alert('Функция оформления заказа будет добавлена позже');
+  const handleCheckout = async () => {
+    try {
+      // Запрашиваем данные для доставки
+      const shippingAddress = prompt('Введите адрес доставки:');
+      if (!shippingAddress) return;
+      
+      const phone = prompt('Введите номер телефона:');
+      if (!phone) return;
+      
+      const notes = prompt('Примечания к заказу (необязательно):') || '';
+      
+      // Создаем заказ
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/orders/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shipping_address: shippingAddress,
+          phone: phone,
+          notes: notes
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Ошибка создания заказа');
+      }
+
+      const order = await response.json();
+      
+      // Показываем сообщение об успехе
+      alert(`Заказ #${order.id} успешно оформлен! Статус: ${order.status_display}`);
+      
+      // Закрываем корзину
+      onClose();
+      
+      // Перенаправляем на страницу заказов
+      window.location.href = '/orders';
+      
+    } catch (error) {
+      console.error('Ошибка оформления заказа:', error);
+      alert(`Ошибка оформления заказа: ${error.message}`);
+    }
   };
 
   if (loading) {

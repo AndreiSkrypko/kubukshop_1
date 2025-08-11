@@ -4,11 +4,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.db.models import Q
-from .models import Category, Product, Cart, CartItem, Favorite
+from .models import Category, Product, Cart, CartItem, Favorite, Order, OrderItem
 from .serializers import (
     CategorySerializer, ProductSerializer, CartSerializer, 
     CartItemSerializer, AddToCartSerializer, UpdateCartItemSerializer,
-    FavoriteSerializer
+    FavoriteSerializer, OrderSerializer, CreateOrderSerializer
 )
 from .pagination import ProductPagination
 
@@ -279,5 +279,85 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         """Получить количество избранных товаров"""
         count = Favorite.objects.filter(user=request.user).count()
         return Response({'count': count})
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    """ViewSet для заказов"""
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+    
+    def create(self, request):
+        """Создать заказ из корзины"""
+        try:
+            # Получаем корзину пользователя
+            cart = Cart.objects.get(user=request.user)
+            if not cart.items.exists():
+                return Response({'error': 'Корзина пуста'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Валидируем данные заказа
+            serializer = CreateOrderSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Создаем заказ
+            order = Order.objects.create(
+                user=request.user,
+                total_price=cart.total_price,
+                shipping_address=serializer.validated_data['shipping_address'],
+                phone=serializer.validated_data['phone'],
+                notes=serializer.validated_data.get('notes', '')
+            )
+            
+            # Создаем элементы заказа
+            for cart_item in cart.items.all():
+                OrderItem.objects.create(
+                    order=order,
+                    product=cart_item.product,
+                    quantity=cart_item.quantity,
+                    price=cart_item.product.price
+                )
+            
+            # Очищаем корзину
+            cart.items.all().delete()
+            cart.save()
+            
+            # Возвращаем созданный заказ
+            order_serializer = OrderSerializer(order)
+            return Response(order_serializer.data, status=status.HTTP_201_CREATED)
+            
+        except Cart.DoesNotExist:
+            return Response({'error': 'Корзина не найдена'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(f"Error creating order: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': 'Ошибка создания заказа'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        """Обновить статус заказа (только для админов)"""
+        if not request.user.is_staff:
+            return Response({'error': 'Доступ запрещен'}, status=status.HTTP_403_FORBIDDEN)
+        
+        try:
+            order = Order.objects.get(pk=pk)
+            new_status = request.data.get('status')
+            
+            if new_status not in dict(Order.STATUS_CHOICES):
+                return Response({'error': 'Неверный статус'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            order.status = new_status
+            order.save()
+            
+            serializer = OrderSerializer(order)
+            return Response(serializer.data)
+            
+        except Order.DoesNotExist:
+            return Response({'error': 'Заказ не найден'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

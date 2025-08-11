@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Product, Cart, CartItem, Favorite
+from .models import Category, Product, Cart, CartItem, Favorite, Order, OrderItem
 from users.serializers import UserSerializer
 
 
@@ -109,3 +109,33 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ['id', 'product', 'created_at']
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    """Сериализатор для элементов заказа"""
+    product = ProductSerializer(read_only=True)
+    total_price = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'quantity', 'price', 'total_price']
+    
+    def get_total_price(self, obj):
+        return obj.total_price
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    """Сериализатор для заказа"""
+    items = OrderItemSerializer(many=True, read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    
+    class Meta:
+        model = Order
+        fields = ['id', 'status', 'status_display', 'total_price', 'shipping_address', 'phone', 'notes', 'items', 'created_at', 'updated_at']
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    """Сериализатор для создания заказа"""
+    shipping_address = serializers.CharField(required=True)
+    phone = serializers.CharField(required=True)
+    notes = serializers.CharField(required=False, allow_blank=True)

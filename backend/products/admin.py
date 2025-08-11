@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, Cart, CartItem, Favorite
+from .models import Category, Product, Cart, CartItem, Favorite, Order, OrderItem
 
 # Register your models here.
 
@@ -42,3 +42,38 @@ class FavoriteAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['user__username', 'product__name']
     ordering = ['-created_at']
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'status', 'total_price', 'created_at', 'updated_at']
+    list_filter = ['status', 'created_at', 'updated_at']
+    search_fields = ['user__username', 'user__email', 'id']
+    list_editable = ['status']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']
+    
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('user', 'status', 'total_price')
+        }),
+        ('Доставка', {
+            'fields': ('shipping_address', 'phone')
+        }),
+        ('Дополнительно', {
+            'fields': ('notes',)
+        }),
+        ('Даты', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ['order', 'product', 'quantity', 'price', 'total_price']
+    list_filter = ['order__status']
+    search_fields = ['product__name', 'order__id']
+    readonly_fields = ['price']
+    ordering = ['order__id', 'id']
