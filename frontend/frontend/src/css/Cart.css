@@ -17,7 +17,7 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  max-width: 800px;
+  max-width: 700px;
   width: 100%;
   max-height: 90vh;
   overflow: hidden;
@@ -93,16 +93,21 @@
 
 .cart-item {
   display: grid;
-  grid-template-columns: 80px 1fr auto auto auto;
+  grid-template-columns: 70px 1fr auto auto auto;
   gap: 1rem;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid #f8f9fa;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  margin: 0 1rem;
+  border-radius: 12px;
+  background: #ffffff;
 }
 
 .cart-item:hover {
   background-color: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .cart-item:last-child {
@@ -110,20 +115,23 @@
 }
 
 .item-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
   overflow: hidden;
   background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .item-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 4px;
 }
 
 .item-placeholder {
@@ -132,43 +140,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 1.8rem;
   color: #adb5bd;
 }
 
 .item-info {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .item-name {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #2c3e50;
+  line-height: 1.3;
 }
 
 .item-category {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #6c757d;
+  background: #e9ecef;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  display: inline-block;
+  width: fit-content;
 }
 
 .item-price {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
 }
 
 .price-amount {
   font-weight: 600;
   color: #2c3e50;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .price-per-item {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #6c757d;
 }
 
@@ -176,15 +190,16 @@
 .item-quantity {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   background: #f8f9fa;
   border-radius: 8px;
-  padding: 0.5rem;
+  padding: 0.4rem;
+  border: 1px solid #e9ecef;
 }
 
 .quantity-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: none;
   background: white;
   color: #495057;
@@ -195,12 +210,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid #dee2e6;
 }
 
 .quantity-btn:hover:not(:disabled) {
   background: #007bff;
   color: white;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .quantity-btn:disabled {
@@ -209,10 +225,11 @@
 }
 
 .quantity-value {
-  min-width: 40px;
+  min-width: 32px;
   text-align: center;
   font-weight: 600;
   color: #2c3e50;
+  font-size: 0.9rem;
 }
 
 /* Общая стоимость элемента */
@@ -223,19 +240,19 @@
 .total-amount {
   font-weight: 700;
   color: #28a745;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 /* Кнопка удаления */
 .remove-item-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: none;
   background: #dc3545;
   color: white;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   transition: all 0.2s ease;
   display: flex;
@@ -245,7 +262,7 @@
 
 .remove-item-btn:hover:not(:disabled) {
   background: #c82333;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .remove-item-btn:disabled {
@@ -347,6 +364,7 @@
     grid-template-columns: 60px 1fr auto;
     gap: 0.75rem;
     padding: 1rem 1.5rem;
+    margin: 0 0.5rem;
   }
   
   .item-image {
@@ -396,10 +414,11 @@
   .cart-item {
     padding: 1rem;
     gap: 0.5rem;
+    margin: 0 0.25rem;
   }
   
   .item-name {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   
   .cart-summary,
