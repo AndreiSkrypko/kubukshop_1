@@ -106,7 +106,7 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
           // Обработка пагинированных данных
           setProducts(data.results || data);
           setTotalCount(data.count || data.length);
-          setTotalPages(Math.ceil((data.count || data.length) / 10));
+          setTotalPages(Math.ceil((data.count || data.length) / 9));
         }
         
         // Загружаем состояние избранного для загруженных товаров
@@ -376,7 +376,7 @@ export default function LegoProducts({ selectedCategory, openCart, onResetCatego
     return (
       <div className="pagination-container">
         <div className="pagination-info">
-          Показано {((currentPage - 1) * 10) + 1}-{Math.min(currentPage * 10, totalCount)} из {totalCount} товаров
+          Показано {((currentPage - 1) * 9) + 1}-{Math.min(currentPage * 9, totalCount)} из {totalCount} товаров
         </div>
         <div className="pagination-controls">
           {pages}
