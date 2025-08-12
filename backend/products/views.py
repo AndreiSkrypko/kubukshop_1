@@ -16,6 +16,11 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+    
     @action(detail=True, methods=['get'])
     def products(self, request, pk=None):
         """Получить товары конкретной категории"""
